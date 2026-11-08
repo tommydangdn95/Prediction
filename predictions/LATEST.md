@@ -3,7 +3,7 @@
 > **Mỗi kỳ quay là độc lập. Thống kê quá khứ không làm tăng xác suất trúng.**
 > Mọi bộ số — kể cả bộ ngẫu nhiên — có cùng xác suất trúng. Bộ gợi ý chỉ phản ánh đặc điểm dữ liệu quá khứ.
 
-Tạo lúc 22:55 08/11/2026 (giờ VN) · seed `20261108` · 2 bộ mỗi chiến lược.
+Tạo lúc 23:13 08/11/2026 (giờ VN) · seed `20261108` · 2 bộ mỗi chiến lược.
 
 ## Lotto 5/35
 
@@ -24,15 +24,15 @@ Tạo lúc 22:55 08/11/2026 (giờ VN) · seed `20261108` · 2 bộ mỗi chiế
 
 <details><summary>Backtest walk-forward (20 kỳ, 300 lần/kỳ)</summary>
 
-| Chiến lược | Số trùng TB/kỳ | so với Random | Trúng giải |
-|---|---:|---:|---:|
-| random | 0.722 | - | 10.08 % |
-| hot | 0.761 | +0.039 | 7.27 % |
-| cold | 0.611 | -0.112 | 7.58 % |
-| balanced | 0.708 | -0.015 | 9.17 % |
-| _lý thuyết_ | 0.714 | | 9.60 % |
+| Chiến lược | Số trùng TB/kỳ | so với Random | p ghép cặp | Trúng giải |
+|---|---:|---:|---:|---:|
+| random | 0.722 | - | - | 10.08 % |
+| hot | 0.761 | +0.039 | 0.619 | 7.27 % |
+| cold | 0.611 | -0.112 | 0.182 | 7.58 % |
+| balanced | 0.708 | -0.015 | 0.311 | 9.17 % |
+| _lý thuyết_ | 0.714 | | | 9.60 % |
 
-Chênh lệch lớn nhất so với Random 0.112 < 2×SE = 0.33 → **không có lợi thế nào có ý nghĩa thống kê**.
+p dùng chênh lệch ghép cặp theo từng kỳ; ngưỡng Bonferroni 5%: p < 0.0167. **Không phát hiện chiến lược nào tốt hơn Random ở ngưỡng đã hiệu chỉnh**; mẫu nhỏ nên kết quả chỉ mang tính thăm dò.
 
 </details>
 
@@ -82,15 +82,15 @@ Chênh lệch lớn nhất so với Random 0.112 < 2×SE = 0.33 → **không có
 
 <details><summary>Backtest walk-forward (20 kỳ, 300 lần/kỳ)</summary>
 
-| Chiến lược | Số trùng TB/kỳ | so với Random | Trúng giải |
-|---|---:|---:|---:|
-| random | 0.804 | - | 2.32 % |
-| hot | 0.742 | -0.063 | 1.73 % |
-| cold | 0.959 | +0.155 | 3.68 % |
-| balanced | 0.803 | -0.001 | 2.50 % |
-| _lý thuyết_ | 0.800 | | 2.38 % |
+| Chiến lược | Số trùng TB/kỳ | so với Random | p ghép cặp | Trúng giải |
+|---|---:|---:|---:|---:|
+| random | 0.804 | - | - | 2.32 % |
+| hot | 0.742 | -0.063 | 0.484 | 1.73 % |
+| cold | 0.959 | +0.155 | 0.052 | 3.68 % |
+| balanced | 0.803 | -0.001 | 0.920 | 2.50 % |
+| _lý thuyết_ | 0.800 | | | 2.38 % |
 
-Chênh lệch lớn nhất so với Random 0.154 < 2×SE = 0.35 → **không có lợi thế nào có ý nghĩa thống kê**.
+p dùng chênh lệch ghép cặp theo từng kỳ; ngưỡng Bonferroni 5%: p < 0.0167. **Không phát hiện chiến lược nào tốt hơn Random ở ngưỡng đã hiệu chỉnh**; mẫu nhỏ nên kết quả chỉ mang tính thăm dò.
 
 </details>
 
@@ -137,15 +137,15 @@ Chênh lệch lớn nhất so với Random 0.154 < 2×SE = 0.35 → **không có
 
 <details><summary>Backtest walk-forward (21 kỳ, 300 lần/kỳ)</summary>
 
-| Chiến lược | Số trùng TB/kỳ | so với Random | Trúng giải |
-|---|---:|---:|---:|
-| random | 0.650 | - | 1.33 % |
-| hot | 0.685 | +0.035 | 1.57 % |
-| cold | 0.682 | +0.032 | 0.78 % |
-| balanced | 0.657 | +0.007 | 1.46 % |
-| _lý thuyết_ | 0.655 | | 1.33 % |
+| Chiến lược | Số trùng TB/kỳ | so với Random | p ghép cặp | Trúng giải |
+|---|---:|---:|---:|---:|
+| random | 0.650 | - | - | 1.33 % |
+| hot | 0.685 | +0.035 | 0.706 | 1.57 % |
+| cold | 0.682 | +0.032 | 0.601 | 0.78 % |
+| balanced | 0.657 | +0.007 | 0.680 | 1.46 % |
+| _lý thuyết_ | 0.655 | | | 1.33 % |
 
-Chênh lệch lớn nhất so với Random 0.035 < 2×SE = 0.32 → **không có lợi thế nào có ý nghĩa thống kê**.
+p dùng chênh lệch ghép cặp theo từng kỳ; ngưỡng Bonferroni 5%: p < 0.0167. **Không phát hiện chiến lược nào tốt hơn Random ở ngưỡng đã hiệu chỉnh**; mẫu nhỏ nên kết quả chỉ mang tính thăm dò.
 
 </details>
 
