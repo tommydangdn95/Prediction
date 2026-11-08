@@ -54,12 +54,15 @@ internal static class BacktestCommand
         var inv = CultureInfo.InvariantCulture;
         var odds = game.Odds;
         var baseline = results.Single(r => r.Strategy == "random");
-        var se = baseline.StandardError;
+        var comparisons = results.Where(r => r.Strategy != "random")
+            .Select(r => Backtester.Compare(r, baseline)).ToDictionary(c => c.Strategy);
+        var correctedAlpha = comparisons.Count == 0 ? 0.05 : 0.05 / comparisons.Count;
         var table = new Table().Border(TableBorder.Rounded)
             .Title($"Backtest {game.Name} {baseline.TestDraws} kỳ (#{draws[trainCount].DrawId}–#{draws[^1].DrawId}), {runCount} lần/kỳ, seed {seedValue}")
             .AddColumn("Chiến lược")
             .AddColumn(new TableColumn("Số trùng TB/kỳ").RightAligned())
             .AddColumn(new TableColumn("so với Random").RightAligned())
+            .AddColumn(new TableColumn("p ghép cặp").RightAligned())
             .AddColumn(new TableColumn("Tỉ lệ ≥3 số").RightAligned());
         if (game.TicketHasSpecial) table.AddColumn(new TableColumn("Trùng ĐB").RightAligned());
         table.AddColumn(new TableColumn("Trúng giải").RightAligned());
@@ -72,6 +75,7 @@ internal static class BacktestCommand
                 r.Strategy == "random" ? "random (baseline)" : r.Strategy,
                 r.AverageMatches.ToString("F3", inv),
                 r.Strategy == "random" ? "-" : diff.ToString("+0.000;-0.000;0.000", inv),
+                r.Strategy == "random" ? "-" : comparisons[r.Strategy].PValue.ToString("F3", inv),
                 r.RateAtLeast3.ToString("P2", inv),
             };
             if (game.TicketHasSpecial) cells.Add(r.SpecialHitRate!.Value.ToString("P2", inv));
@@ -80,7 +84,7 @@ internal static class BacktestCommand
         }
         var theory = new List<string>
         {
-            "[grey]lý thuyết[/]", $"[grey]{odds.ExpectedMatches.ToString("F3", inv)}[/]", "",
+            "[grey]lý thuyết[/]", $"[grey]{odds.ExpectedMatches.ToString("F3", inv)}[/]", "", "",
             $"[grey]{odds.ProbabilityAtLeast(3).ToString("P2", inv)}[/]",
         };
         if (game.TicketHasSpecial) theory.Add($"[grey]{(1.0 / game.SpecialMax).ToString("P2", inv)}[/]");
@@ -88,13 +92,13 @@ internal static class BacktestCommand
         table.AddRow(theory.ToArray());
         AnsiConsole.Write(table);
 
+        var better = comparisons.Values.Where(c => c.MeanDifference > 0 && c.PValue < correctedAlpha).ToList();
         AnsiConsole.MarkupLine(
-            $"Với {baseline.TestDraws} kỳ kiểm tra, sai số chuẩn của số trùng TB ≈ [bold]{se.ToString("F2", inv)}[/] " +
-            "(lặp nhiều lần trên cùng các kỳ không giảm sai số này).");
-        var maxDiff = results.Max(r => Math.Abs(r.AverageMatches - baseline.AverageMatches));
-        AnsiConsole.MarkupLine(maxDiff < 2 * se
-            ? $"Chênh lệch lớn nhất so với Random là {maxDiff.ToString("F3", inv)} < 2×SE = {(2 * se).ToString("F2", inv)} → [yellow]không có lợi thế nào có ý nghĩa thống kê[/]."
-            : $"Chênh lệch lớn nhất {maxDiff.ToString("F3", inv)} ≥ 2×SE trên mẫu nhỏ này; với nhiều chiến lược được thử, đây vẫn có thể là ngẫu nhiên.");
+            $"p được tính từ chênh lệch ghép cặp theo {baseline.TestDraws} kỳ; ngưỡng Bonferroni 5% cho {comparisons.Count} so sánh: " +
+            $"[bold]p < {correctedAlpha.ToString("F4", inv)}[/].");
+        AnsiConsole.MarkupLine(better.Count == 0
+            ? "[yellow]Không phát hiện chiến lược nào tốt hơn Random ở ngưỡng đã hiệu chỉnh[/]; mẫu nhỏ nên kết quả chỉ mang tính thăm dò."
+            : $"[yellow]Có bằng chứng thăm dò rằng {Markup.Escape(string.Join(", ", better.Select(c => c.Strategy)))} tốt hơn Random trên mẫu này; cần kiểm chứng bằng dữ liệu mới.[/]");
         Ui.WriteOdds(game);
         AnsiConsole.WriteLine();
     }

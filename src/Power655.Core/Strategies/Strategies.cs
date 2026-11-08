@@ -69,15 +69,19 @@ public sealed class BalancedPick : IPickStrategy
     public Ticket Pick(Game game, IReadOnlyList<Draw> history, Random rng)
     {
         var (minSum, maxSum) = SumBounds(game, history);
-        int[] candidate = [];
         for (var attempt = 0; attempt < MaxAttempts; attempt++)
         {
-            candidate = PickHelper.Sample(game.AllNumbers, game.PickCount, rng);
+            var candidate = PickHelper.Sample(game.AllNumbers, game.PickCount, rng);
             if (IsBalanced(game, candidate, minSum, maxSum))
-                break;
+                return new Ticket(candidate, PickHelper.SampleSpecial(game, game.AllSpecialNumbers, rng));
         }
-        // không thể hết lượt với dữ liệu thực; nếu có thì trả bộ cuối thay vì treo
-        return new Ticket(candidate, PickHelper.SampleSpecial(game, game.AllSpecialNumbers, rng));
+
+        // Rejection sampling rất nhanh với dữ liệu bình thường. Nếu khoảng tổng quá hẹp,
+        // tìm có hệ thống để vẫn bảo đảm không bao giờ trả một vé sai điều kiện.
+        var fallback = FindBalancedCandidate(game, minSum, maxSum)
+            ?? throw new InvalidOperationException(
+                $"Không tồn tại bộ {game.Name} cân bằng có tổng trong [{minSum:F1}, {maxSum:F1}].");
+        return new Ticket(fallback, PickHelper.SampleSpecial(game, game.AllSpecialNumbers, rng));
     }
 
     public static (double Min, double Max) SumBounds(Game game, IReadOnlyList<Draw> history)
@@ -96,6 +100,50 @@ public sealed class BalancedPick : IPickStrategy
     }
 
     private static bool IsHalf(int count, int total) => count == total / 2 || count == (total + 1) / 2;
+
+    private static int[]? FindBalancedCandidate(Game game, double minSum, double maxSum)
+    {
+        var min = (int)Math.Ceiling(minSum);
+        var max = (int)Math.Floor(maxSum);
+        var minHalf = game.PickCount / 2;
+        var maxHalf = (game.PickCount + 1) / 2;
+        var chosen = new List<int>(game.PickCount);
+        var impossible = new HashSet<(int Start, int Remaining, int Sum, int Even, int Low)>();
+
+        bool Search(int start, int remaining, int sum, int even, int low)
+        {
+            if (remaining == 0)
+                return sum >= min && sum <= max
+                    && IsHalf(even, game.PickCount)
+                    && IsHalf(low, game.PickCount);
+            if (start > game.MaxNumber - remaining + 1 || even > maxHalf || low > maxHalf
+                || even + remaining < minHalf || low + remaining < minHalf)
+                return false;
+
+            var minimumPossible = remaining * (2 * start + remaining - 1) / 2;
+            var maximumPossible = remaining * (2 * game.MaxNumber - remaining + 1) / 2;
+            if (sum + minimumPossible > max || sum + maximumPossible < min)
+                return false;
+
+            var state = (start, remaining, sum, even, low);
+            if (!impossible.Add(state)) return false;
+
+            for (var n = start; n <= game.MaxNumber - remaining + 1; n++)
+            {
+                chosen.Add(n);
+                if (Search(n + 1, remaining - 1, sum + n,
+                        even + (n % 2 == 0 ? 1 : 0),
+                        low + (n <= game.LowHighBoundary ? 1 : 0)))
+                    return true;
+                chosen.RemoveAt(chosen.Count - 1);
+            }
+            return false;
+        }
+
+        return min <= max && Search(Game.MinNumber, game.PickCount, 0, 0, 0)
+            ? chosen.ToArray()
+            : null;
+    }
 }
 
 public static class StrategyCatalog

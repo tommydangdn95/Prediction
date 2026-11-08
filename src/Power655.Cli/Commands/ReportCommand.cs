@@ -129,23 +129,27 @@ internal static class ReportCommand
         }
         var results = StrategyCatalog.All().Select(s => Backtester.Run(game, draws, s, train, runs, seed)).ToList();
         var baseline = results.Single(r => r.Strategy == "random");
-        var se = baseline.StandardError;
+        var comparisons = results.Where(r => r.Strategy != "random")
+            .Select(r => Backtester.Compare(r, baseline)).ToDictionary(c => c.Strategy);
+        var correctedAlpha = comparisons.Count == 0 ? 0.05 : 0.05 / comparisons.Count;
 
         sb.AppendLine("<details><summary>Backtest walk-forward " +
                       $"({baseline.TestDraws} kỳ, {runs} lần/kỳ)</summary>");
         sb.AppendLine();
-        sb.AppendLine("| Chiến lược | Số trùng TB/kỳ | so với Random | Trúng giải |");
-        sb.AppendLine("|---|---:|---:|---:|");
+        sb.AppendLine("| Chiến lược | Số trùng TB/kỳ | so với Random | p ghép cặp | Trúng giải |");
+        sb.AppendLine("|---|---:|---:|---:|---:|");
         foreach (var r in results)
             sb.AppendLine($"| {r.Strategy} | {r.AverageMatches.ToString("F3", Inv)} | " +
                           $"{(r.Strategy == "random" ? "-" : (r.AverageMatches - baseline.AverageMatches).ToString("+0.000;-0.000;0.000", Inv))} | " +
+                          $"{(r.Strategy == "random" ? "-" : comparisons[r.Strategy].PValue.ToString("F3", Inv))} | " +
                           $"{r.AnyPrizeRate.ToString("P2", Inv)} |");
-        sb.AppendLine($"| _lý thuyết_ | {game.Odds.ExpectedMatches.ToString("F3", Inv)} | | {game.Odds.AnyPrizeProbability.ToString("P2", Inv)} |");
+        sb.AppendLine($"| _lý thuyết_ | {game.Odds.ExpectedMatches.ToString("F3", Inv)} | | | {game.Odds.AnyPrizeProbability.ToString("P2", Inv)} |");
         sb.AppendLine();
-        var maxDiff = results.Max(r => Math.Abs(r.AverageMatches - baseline.AverageMatches));
-        sb.AppendLine(maxDiff < 2 * se
-            ? $"Chênh lệch lớn nhất so với Random {maxDiff.ToString("F3", Inv)} < 2×SE = {(2 * se).ToString("F2", Inv)} → **không có lợi thế nào có ý nghĩa thống kê**."
-            : $"Chênh lệch lớn nhất {maxDiff.ToString("F3", Inv)} ≥ 2×SE trên mẫu nhỏ; với nhiều chiến lược được thử, đây vẫn có thể là ngẫu nhiên.");
+        var better = comparisons.Values.Where(c => c.MeanDifference > 0 && c.PValue < correctedAlpha).ToList();
+        sb.AppendLine($"p dùng chênh lệch ghép cặp theo từng kỳ; ngưỡng Bonferroni 5%: p < {correctedAlpha.ToString("F4", Inv)}. " +
+                      (better.Count == 0
+                          ? "**Không phát hiện chiến lược nào tốt hơn Random ở ngưỡng đã hiệu chỉnh**; mẫu nhỏ nên kết quả chỉ mang tính thăm dò."
+                          : $"Có bằng chứng thăm dò rằng **{string.Join(", ", better.Select(c => c.Strategy))}** tốt hơn Random trên mẫu này; cần kiểm chứng bằng dữ liệu mới."));
         sb.AppendLine();
         sb.AppendLine("</details>");
         sb.AppendLine();

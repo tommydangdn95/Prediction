@@ -135,6 +135,17 @@ public class StrategyTests
     }
 
     [Fact]
+    public void Balanced_never_returns_an_invalid_ticket_when_sum_bounds_are_impossible()
+    {
+        var impossibleHistory = Enumerable.Range(1, 4)
+            .Select(id => D(id, 7, 1, 2, 3, 4, 5, 6)).ToList();
+
+        var act = () => new BalancedPick().Pick(P, impossibleHistory, new Random(1));
+
+        act.Should().Throw<InvalidOperationException>().WithMessage("*Không tồn tại bộ*");
+    }
+
+    [Fact]
     public void Unknown_strategy_throws()
     {
         var act = () => StrategyCatalog.Create("lucky");
@@ -200,6 +211,21 @@ public class BacktestTests
         var a = Backtester.Run(P, Seed, new HotPick(), 20, 50, seed: 7);
         var b = Backtester.Run(P, Seed, new HotPick(), 20, 50, seed: 7);
         a.AverageMatches.Should().Be(b.AverageMatches);
+    }
+
+    [Fact]
+    public void Paired_comparison_uses_per_draw_differences()
+    {
+        var baseline = Backtester.Run(P, Seed, new RandomPick(), 20, 50, seed: 7);
+        var strategy = Backtester.Run(P, Seed, new HotPick(), 20, 50, seed: 7);
+
+        var comparison = Backtester.Compare(strategy, baseline);
+
+        comparison.Draws.Should().Be(20);
+        comparison.MeanDifference.Should().BeApproximately(
+            strategy.AverageMatches - baseline.AverageMatches, 1e-12);
+        comparison.StandardError.Should().BeGreaterThanOrEqualTo(0);
+        comparison.PValue.Should().BeInRange(0, 1);
     }
 
     [Fact]

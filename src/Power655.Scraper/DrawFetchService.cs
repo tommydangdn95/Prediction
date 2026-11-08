@@ -90,7 +90,8 @@ public sealed class DrawFetchService(
                 logger.LogError("Mâu thuẫn kỳ {DrawId}: {Primary} ({PrimarySource}) ≠ {Fallback} ({FallbackSource}); giữ {PrimarySource}.",
                     d.DrawId, kept, kept.Source, d, d.Source, kept.Source);
             }
-            else if (kept.Jackpot1 is null && d.Jackpot1 is not null)
+            else if ((kept.Jackpot1 is null && d.Jackpot1 is not null)
+                     || (kept.Jackpot2 is null && d.Jackpot2 is not null))
             {
                 // cùng kết quả: lấy thêm jackpot từ nguồn dự phòng
                 merged[d.DrawId] = kept.With(jackpot1: d.Jackpot1, jackpot2: d.Jackpot2);
@@ -114,7 +115,7 @@ public sealed class DrawFetchService(
         }
     }
 
-    /// <returns>Các kỳ lấy được, và cờ "nguồn lỗi ngay trang đầu".</returns>
+    /// <returns>Các kỳ lấy được, và cờ nguồn bị lỗi/không có dữ liệu trước khi hoàn tất số trang yêu cầu.</returns>
     private async Task<(IReadOnlyList<Draw> Draws, bool FailedAtStart)> FetchPagesAsync(
         Game game, IDrawSource source, int pages, List<string> warnings, CancellationToken ct)
     {
@@ -130,7 +131,7 @@ public sealed class DrawFetchService(
             catch (Exception ex) when (VietlottSource.IsRecoverable(ex, ct))
             {
                 Warn(warnings, $"{source.Name} {game.Name} trang {page} lỗi: {ex.Message}");
-                return (Ordered(result), result.Count == 0);
+                return (Ordered(result), true);
             }
 
             if (draws.Count == 0)

@@ -104,6 +104,20 @@ public class FetchServiceTests
     }
 
     [Fact]
+    public async Task Primary_failure_after_first_page_still_switches_to_fallback()
+    {
+        var primary = new FakeSource("vietlott", [V(3, 9, 1, 2, 3, 4, 5, 6)])
+            { FailPages = [2] };
+        var fallback = new FakeSource("minhngoc", [M(4, 9, 1, 2, 3, 4, 5, 8), M(3, 9, 1, 2, 3, 4, 5, 6)]);
+
+        var report = await Service(primary, fallback).FetchAsync(P, 3, null, default);
+
+        report.Draws.Select(d => d.DrawId).Should().Equal(4, 3);
+        fallback.RequestedPages.Should().Equal(1, 2);
+        report.Warnings.Should().Contain(w => w.Contains("chuyển sang nguồn dự phòng"));
+    }
+
+    [Fact]
     public async Task Conflicting_numbers_keep_vietlott_and_report()
     {
         var primary = new FakeSource("vietlott", [V(3, 9, 1, 2, 3, 4, 5, 6)]);
@@ -113,6 +127,20 @@ public class FetchServiceTests
 
         report.Draws.Single().Numbers.Should().Equal(1, 2, 3, 4, 5, 6);
         report.Conflicts.Should().ContainSingle();
+    }
+
+    [Fact]
+    public async Task Cross_check_fills_missing_jackpot2_even_when_jackpot1_exists()
+    {
+        var primaryDraw = new Draw(P, 3, Day, [1, 2, 3, 4, 5, 6], 9,
+            jackpot1: 100, jackpot2: null, source: DrawSources.Vietlott);
+        var fallbackDraw = new Draw(P, 3, Day, [1, 2, 3, 4, 5, 6], 9,
+            jackpot1: 100, jackpot2: 50, source: DrawSources.MinhNgoc);
+
+        var report = await Service(new FakeSource("vietlott", [primaryDraw]),
+            new FakeSource("minhngoc", [fallbackDraw])).FetchAsync(P, 1, null, default);
+
+        report.Draws.Single().Jackpot2.Should().Be(50);
     }
 
     [Fact]
@@ -130,6 +158,7 @@ public class FetchServiceTests
     internal sealed class FakeSource(string name, params Draw[][] pages) : IDrawSource
     {
         public bool Fail { get; init; }
+        public HashSet<int> FailPages { get; init; } = [];
         public Func<Game, bool> SupportsGame { get; init; } = _ => true;
         public List<int> RequestedPages { get; } = [];
         public string Name => name;
@@ -139,7 +168,7 @@ public class FetchServiceTests
         public Task<IReadOnlyList<Draw>> FetchPageAsync(Game game, int page, CancellationToken ct)
         {
             RequestedPages.Add(page);
-            if (Fail) throw new HttpRequestException("boom");
+            if (Fail || FailPages.Contains(page)) throw new HttpRequestException("boom");
             IReadOnlyList<Draw> result = page <= pages.Length ? pages[page - 1] : [];
             return Task.FromResult(result);
         }

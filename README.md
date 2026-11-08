@@ -57,8 +57,9 @@ Chạy báo cáo ở máy: `dotnet run --project src/Power655.Cli -- report --ou
 | `cold` | random trong top-18 số gan | top-15; ĐB trong top-4 ĐB gan |
 | `balanced` | 3 chẵn/3 lẻ, 3 nhỏ/3 lớn, tổng ∈ [P25,P75] | 2–3 chẵn, 2–3 nhỏ (≤17), tổng ∈ [P25,P75]; ĐB ngẫu nhiên |
 
-Ranh giới nhỏ/lớn = MaxNumber/2 (27, 22, 17). Backtest trên dữ liệu thật (40 kỳ mỗi game, 08/11/2026) cho thấy
-không chiến lược nào khác random có ý nghĩa thống kê ở cả 3 game.
+Ranh giới nhỏ/lớn = MaxNumber/2 (27, 22, 17). Backtest so sánh với random bằng chênh lệch ghép cặp theo từng kỳ,
+kèm p-value và hiệu chỉnh Bonferroni khi thử nhiều chiến lược. Kết quả trên mẫu nhỏ chỉ mang tính thăm dò và cần
+được kiểm chứng bằng dữ liệu mới.
 
 ## Cấu trúc
 

@@ -14,7 +14,8 @@
 - HTML bảng kết quả giống nhau: 6/55 có 7 `span.bong_tron` (số thứ 7 = ĐB), 6/45 có 6, 5/35 có 5 + `span.bong_tron-sperator` + 1 ĐB (1–12).
 - minhngoc: 6/45 dùng khối `div.bangkq6x36` (id `DT6X45_*`); trang `lotto-5x35.html` không có kết quả trong HTML (nạp bằng JS) → 5/35 chỉ dùng vietlott.
 
-Phần dưới là ghi chép gốc ngày 2026-11-07 cho 6/55.
+Phần dưới là ghi chép lịch sử ngày 2026-11-07 cho 6/55. Các giả định trong phần này đã được
+xác minh/cập nhật ở mục ngày 2026-11-08 phía trên; khi có khác biệt, thông tin phía trên là thông tin hiện hành.
 
 Ghi nhận ngày **2026-11-07** bằng cách đọc HTML/JS của trang (không dùng DevTools).
 
@@ -22,7 +23,7 @@ Ghi nhận ngày **2026-11-07** bằng cách đọc HTML/JS của trang (không 
 |---|---|
 | URL, method, header, tên tham số | ✅ Xác nhận từ JS proxy AjaxPro do server phát |
 | Cấu trúc HTML bảng kết quả | ✅ Xác nhận (trang tĩnh), có test fixture |
-| Gọi POST thật, PageIndex bắt đầu từ 0 hay 1 | ⚠️ **Chưa chạy thử** — cần kiểm tra bằng DevTools hoặc `power655 fetch -v` |
+| Gọi POST thật, PageIndex bắt đầu từ 0 hay 1 | ✅ Đã xác minh ngày 08/11/2026: PageIndex bắt đầu từ 0 |
 
 ## 1. Trang kết quả
 
@@ -89,19 +90,18 @@ Referer: https://vietlott.vn/vi/trung-thuong/ket-qua-trung-thuong/winning-number
  "PageIndex":0}
 ```
 
-- `Key` là hằng trong JS trang (`'cae0f881'` ngày 07/11/2026). Code đọc lại bằng regex mỗi phiên, fallback về giá trị này.
+- `Key` trong bản ghi ngày 07/11/2026 là `'cae0f881'`; kiểm tra sau đó cho thấy key có thể đổi theo lần tải.
+  Code hiện đọc từ HTML của từng game và **không** dùng key fallback cố định.
 - `GameDrawId = ""` ⇒ "Toàn bộ" (không lọc kỳ).
 - `ArrayNumbers` = 5 dải × 18 chuỗi rỗng (không dò số).
 - Phản hồi dự kiến: `{"value":{"Error":false,"InfoMessage":"...","HtmlContent":"<div class=\"doso_output_nd ..."}}`,
   có thể kèm hậu tố `;/*` của AjaxPro — code cắt tới dấu `}` cuối.
 - Cookie: không thấy token CSRF nào; HttpClient giữ cookie mặc định.
 
-## 4. Giả định cần xác minh
+## 4. Các giả định đã được xác minh ngày 08/11/2026
 
-1. **PageIndex 0-based**: `CurrentPageIndex` khởi tạo 0 nên code gửi `PageIndex = page - 1`.
-   Nếu sai (trang 2 trả trùng trang 1), `DrawFetchService` sẽ cảnh báo "trùng dữ liệu trang trước" và dừng —
-   khi đó đổi công thức trong `VietlottSource.FetchPageAsync`.
-2. Số kỳ mỗi trang AJAX (giả định 8 như trang tĩnh).
+1. **PageIndex 0-based**: `CurrentPageIndex` khởi tạo 0 và request thật xác nhận code gửi `PageIndex = page - 1`.
+2. Mỗi trang AJAX trả 8 kỳ ở thời điểm xác minh.
 
 Cách kiểm tra nhanh: `power655 fetch --pages 2 --source vietlott -v` và xem log từng trang.
 
