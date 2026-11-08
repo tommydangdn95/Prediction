@@ -1,0 +1,80 @@
+# Cập nhật kết quả + tạo gợi ý cho Lotto 5/35, Mega 6/45, Power 6/55.
+# Được kích hoạt từ bên ngoài (cron-job.org) qua GitHub API — xem docs/cron-job.md.
+name: Daily predictions
+
+on:
+  workflow_dispatch:
+    inputs:
+      pages:
+        description: "Số trang fetch mỗi game (8 kỳ/trang)"
+        required: false
+        default: "3"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-predictions
+  cancel-in-progress: false
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  POWER655_DB: ${{ github.workspace }}/data/power655.db
+  CLI: src/Power655.Cli/bin/Release/net8.0/power655
+
+jobs:
+  predict:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Build
+        run: dotnet build src/Power655.Cli -c Release
+
+      - name: Nạp lịch sử đã lưu
+        run: |
+          if [ -f data/history.csv ]; then
+            $CLI import --csv data/history.csv
+          else
+            $CLI import --csv data/seed/draws_seed.csv
+          fi
+
+      - name: Lấy kết quả mới
+        run: |
+          set +e
+          $CLI fetch --pages "${{ inputs.pages || '3' }}"
+          code=$?
+          set -e
+          # 0 = đủ 3 game, 2 = một phần game lỗi (vẫn tạo báo cáo), 1 = tất cả lỗi
+          if [ "$code" = "1" ]; then
+            echo "::error::Không lấy được dữ liệu game nào (vietlott/minhngoc có thể chặn hoặc đang lỗi)."
+            exit 1
+          elif [ "$code" = "2" ]; then
+            echo "::warning::Một số game không lấy được dữ liệu mới — xem log bước này."
+          fi
+
+      - name: Lưu lịch sử + tạo báo cáo
+        run: |
+          today=$(TZ=Asia/Ho_Chi_Minh date +%Y-%m-%d)
+          $CLI export --csv data/history.csv
+          $CLI report --out "predictions/${today}.md"
+          cp "predictions/${today}.md" predictions/LATEST.md
+          cat predictions/LATEST.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/history.csv predictions/
+          if git diff --cached --quiet; then
+            echo "Không có thay đổi."
+            exit 0
+          fi
+          git commit -m "Gợi ý $(TZ=Asia/Ho_Chi_Minh date +%d/%m/%Y)"
+          git push

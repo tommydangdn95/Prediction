@@ -1,0 +1,4 @@
+* text=auto
+*.html text
+*.csv text
+*.db binary

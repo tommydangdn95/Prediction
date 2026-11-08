@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Power655.Core\Power655.Core.csproj" />
+    <ProjectReference Include="..\..\src\Power655.Data\Power655.Data.csproj" />
+    <ProjectReference Include="..\..\src\Power655.Scraper\Power655.Scraper.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="FluentAssertions" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Xunit" />
+    <Using Include="FluentAssertions" />
+    <None Include="..\..\data\seed\draws_seed.csv" Link="Fixtures\draws_seed.csv" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Fixtures\*.html" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
