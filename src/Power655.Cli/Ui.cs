@@ -13,6 +13,15 @@ internal static class Ui
 
     public static string Balls(IEnumerable<int> numbers) => string.Join(" ", numbers.Select(Ball));
 
+    /// <summary>Phần trăm với đủ chữ số có nghĩa cho cả xác suất rất nhỏ (vd 0,0000257 %).</summary>
+    public static string Percent(double p)
+    {
+        var v = p * 100;
+        if (v == 0) return "0 %";
+        var digits = v >= 1 ? 2 : Math.Min(10, 2 - (int)Math.Floor(Math.Log10(v)));
+        return v.ToString("F" + digits, Vi) + " %";
+    }
+
     public static string Money(long? value) => value is null ? "-" : value.Value.ToString("N0", Vi) + "đ";
 
     public static void GameHeader(Game game) =>

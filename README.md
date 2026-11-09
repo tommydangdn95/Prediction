@@ -48,6 +48,23 @@ Thêm `-v` để xem log chi tiết (từng trang fetch, retry...).
 
 Chạy báo cáo ở máy: `dotnet run --project src/Power655.Cli -- report --out report.md`.
 
+Mỗi báo cáo còn có:
+- **Kiểm tra gợi ý ngày trước**: đọc lại `predictions/yyyy-MM-dd.md` cũ (đổi bằng `--predictions <dir>`), so từng bộ với
+  kết quả thật của kỳ ngay sau “Kỳ mới nhất” trong file đó (số trùng in đậm, hạng giải), kèm bảng thành tích cộng dồn
+  theo chiến lược so với kỳ vọng ngẫu nhiên.
+- **Khả năng (%) của mỗi bộ**: xác suất trúng giải bất kỳ, ≥3 số, độc đắc và phân phối số trùng 0..k, cùng cột % trong bảng giải.
+  Mọi bộ hợp lệ có cùng xác suất.
+- **Tỉ lệ xuất hiện từng số + kiểm định χ²** trên toàn bộ lịch sử: p lớn nghĩa là không có dấu hiệu lệch để khai thác.
+- **Bộ khuyến nghị — phủ số** (đứng đầu mỗi game; `--cover N`, mặc định = tổng số bộ theo thống kê): N vé ít trùng
+  nhau nhất kèm P(≥1 vé trúng) **chính xác** khi mua k vé đầu (`PortfolioOdds` duyệt mọi kết quả quay), so với k vé
+  ngẫu nhiên và với các bộ theo thống kê (hot/cold/balanced, in ngay sau để tham khảo).
+- **Backtest theo nhóm vé** (`Backtester.RunGroups`/`RunCover`): mua N vé mỗi kỳ trên lịch sử thật → tỉ lệ kỳ có ≥1 vé
+  trúng của từng cách chọn, so với lý thuyết.
+
+`data/history.csv` chứa toàn bộ lịch sử cả 3 game: Lotto 5/35 (từ kỳ #00001, 29/06/2025), Mega 6/45 (từ #00001,
+20/07/2016), Power 6/55 (từ #00001, 01/08/2017).
+Nạp lại toàn bộ một game: `fetch -g 645 --pages 220 --source vietlott` (dừng khi hết trang, nghỉ 1s/trang).
+
 ## Chiến lược gợi ý
 
 | Strategy | 6/55, 6/45 | 5/35 |
@@ -56,6 +73,19 @@ Chạy báo cáo ở máy: `dotnet run --project src/Power655.Cli -- report --ou
 | `hot` | random trong top-18 `WeightedScore` | top-15; ĐB trong top-4 ĐB theo `SpecialWeightedScore` |
 | `cold` | random trong top-18 số gan | top-15; ĐB trong top-4 ĐB gan |
 | `balanced` | 3 chẵn/3 lẻ, 3 nhỏ/3 lớn, tổng ∈ [P25,P75] | 2–3 chẵn, 2–3 nhỏ (≤17), tổng ∈ [P25,P75]; ĐB ngẫu nhiên |
+| `cover` | nhóm vé: vòng đầu rời nhau (7 vé 6/45, 9 vé 6/55), sau đó mỗi cặp vé trùng ≤ 1 số | 7 vé phủ đủ 35 số; ĐB khác nhau |
+
+`cover` không dùng lịch sử và không đổi xác suất từng vé; nó chỉ tăng P(ít nhất một vé trong nhóm trúng). Backtest
+mua 8 vé mỗi kỳ trên toàn bộ lịch sử — tỉ lệ kỳ có ≥1 vé trúng:
+
+| 8 vé/kỳ | hot | random | cover |
+|---|---:|---:|---:|
+| Lotto 5/35 (977 kỳ) | 34,6 % | 55,1 % | 70,5 % |
+| Mega 6/45 (1.566 kỳ) | 14,4 % | 17,5 % | 18,9 % |
+| Power 6/55 (1.401 kỳ) | 8,4 % | 10,3 % | 10,8 % |
+
+hot/cold lấy cả nhóm vé từ cùng ~15–18 số (và 4 số ĐB) nên các vé hay cùng trượt. Số vé trúng kỳ vọng và tiền thưởng
+kỳ vọng như nhau với mọi cách chọn. Dùng ở máy: `suggest -g 535 -s cover --sets 8`.
 
 Ranh giới nhỏ/lớn = MaxNumber/2 (27, 22, 17). Backtest so sánh với random bằng chênh lệch ghép cặp theo từng kỳ,
 kèm p-value và hiệu chỉnh Bonferroni khi thử nhiều chiến lược. Kết quả trên mẫu nhỏ chỉ mang tính thăm dò và cần

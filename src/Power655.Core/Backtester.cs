@@ -23,6 +23,12 @@ public sealed record BacktestResult(
 public sealed record PairedBacktestComparison(
     string Strategy, double MeanDifference, double StandardError, double TStatistic, double PValue, int Draws);
 
+/// <summary>Kết quả mua cả nhóm <see cref="GroupSize"/> vé mỗi kỳ trên các kỳ kiểm tra.</summary>
+/// <param name="AnyWinRate">Tỉ lệ (kỳ × lần lặp) có ít nhất một vé trong nhóm trúng giải.</param>
+/// <param name="AverageWinningTickets">Số vé trúng trung bình mỗi nhóm (kỳ vọng = GroupSize × p với mọi cách chọn).</param>
+public sealed record GroupBacktestResult(
+    Game Game, string Strategy, int TestDraws, int GroupSize, int Groups, double AnyWinRate, double AverageWinningTickets);
+
 /// <summary>Backtest walk-forward: với mỗi kỳ t (từ kỳ thứ train+1) chỉ dùng dữ liệu trước t để chọn số.</summary>
 public static class Backtester
 {
@@ -46,10 +52,12 @@ public static class Backtester
         {
             var history = ordered.GetRange(0, t);
             var actual = ordered[t];
+            // thống kê lịch sử tính một lần cho cả `runs` vé của kỳ này
+            var pick = strategy.Prepare(game, history);
             long drawMatches = 0;
             for (var r = 0; r < runs; r++)
             {
-                var ticket = strategy.Pick(game, history, rng);
+                var ticket = pick(rng);
                 var (matches, special) = game.Odds.Match(ticket, actual);
                 histogram[matches]++;
                 totalMatches += matches;
@@ -77,6 +85,64 @@ public static class Backtester
             Rate(prizes),
             distribution,
             averageMatchesByDraw);
+    }
+
+    /// <summary>
+    /// Backtest walk-forward theo nhóm: mỗi kỳ kiểm tra, <paramref name="groups"/> lần chọn <paramref name="groupSize"/> vé
+    /// độc lập bằng <paramref name="strategy"/> (chỉ dùng dữ liệu trước kỳ đó) và đếm nhóm có ít nhất một vé trúng.
+    /// </summary>
+    public static GroupBacktestResult RunGroups(
+        Game game, IReadOnlyList<Draw> draws, IPickStrategy strategy, int groupSize, int train = 20, int groups = 50, int seed = 42)
+    {
+        ArgumentNullException.ThrowIfNull(strategy);
+        return RunGroups(game, draws, strategy.Name, history =>
+        {
+            var pick = strategy.Prepare(game, history);
+            return rng =>
+            {
+                var tickets = new Ticket[groupSize];
+                for (var i = 0; i < groupSize; i++) tickets[i] = pick(rng);
+                return tickets;
+            };
+        }, groupSize, train, groups, seed);
+    }
+
+    /// <summary>Như <see cref="RunGroups(Game, IReadOnlyList{Draw}, IPickStrategy, int, int, int, int)"/> với nhóm vé phủ số.</summary>
+    public static GroupBacktestResult RunCover(
+        Game game, IReadOnlyList<Draw> draws, int groupSize, int train = 20, int groups = 50, int seed = 42) =>
+        RunGroups(game, draws, CoverPicker.Name, _ => rng => CoverPicker.Pick(game, groupSize, rng), groupSize, train, groups, seed);
+
+    private static GroupBacktestResult RunGroups(
+        Game game, IReadOnlyList<Draw> draws, string name,
+        Func<IReadOnlyList<Draw>, Func<Random, IReadOnlyList<Ticket>>> prepare,
+        int groupSize, int train, int groups, int seed)
+    {
+        ArgumentNullException.ThrowIfNull(game);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(groupSize);
+        ArgumentOutOfRangeException.ThrowIfNegative(train);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(groups);
+        if (draws.FirstOrDefault(d => d.Game != game) is { } other)
+            throw new ArgumentException($"Dữ liệu lẫn game: cần {game.Name}, thấy {other.Game.Name}.", nameof(draws));
+
+        var ordered = draws.OrderBy(d => d.DrawId).ToList();
+        var rng = new Random(seed);
+        long anyWin = 0, winningTickets = 0, total = 0;
+        for (var t = train; t < ordered.Count; t++)
+        {
+            var pickGroup = prepare(ordered.GetRange(0, t));
+            var actual = ordered[t];
+            for (var g = 0; g < groups; g++)
+            {
+                var wins = pickGroup(rng).Count(ticket => game.Odds.Classify(ticket, actual) is not null);
+                if (wins > 0) anyWin++;
+                winningTickets += wins;
+                total++;
+            }
+        }
+        return new GroupBacktestResult(
+            game, name, Math.Max(0, ordered.Count - train), groupSize, groups,
+            total == 0 ? double.NaN : (double)anyWin / total,
+            total == 0 ? double.NaN : (double)winningTickets / total);
     }
 
     /// <summary>

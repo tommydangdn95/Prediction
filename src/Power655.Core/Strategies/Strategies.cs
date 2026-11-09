@@ -19,9 +19,10 @@ public sealed class HotPick(int? poolSize = null, double decay = 0.95, double al
 {
     public string Name => "hot";
 
-    public Ticket Pick(Game game, IReadOnlyList<Draw> history, Random rng) =>
-        new(PickHelper.Sample(Pool(game, history), game.PickCount, rng),
-            game.TicketHasSpecial ? PickHelper.SampleSpecial(game, SpecialPool(game, history), rng) : null);
+    public Ticket Pick(Game game, IReadOnlyList<Draw> history, Random rng) => Prepare(game, history)(rng);
+
+    public Func<Random, Ticket> Prepare(Game game, IReadOnlyList<Draw> history) =>
+        PickHelper.FromPools(game, Pool(game, history), game.TicketHasSpecial ? SpecialPool(game, history) : null);
 
     public IReadOnlyList<int> Pool(Game game, IReadOnlyList<Draw> history) =>
         PickHelper.TopBy(DrawStatistics.WeightedScore(game, history, decay, alpha),
@@ -36,9 +37,10 @@ public sealed class ColdPick(int? poolSize = null) : IPickStrategy
 {
     public string Name => "cold";
 
-    public Ticket Pick(Game game, IReadOnlyList<Draw> history, Random rng) =>
-        new(PickHelper.Sample(Pool(game, history), game.PickCount, rng),
-            game.TicketHasSpecial ? PickHelper.SampleSpecial(game, SpecialPool(game, history), rng) : null);
+    public Ticket Pick(Game game, IReadOnlyList<Draw> history, Random rng) => Prepare(game, history)(rng);
+
+    public Func<Random, Ticket> Prepare(Game game, IReadOnlyList<Draw> history) =>
+        PickHelper.FromPools(game, Pool(game, history), game.TicketHasSpecial ? SpecialPool(game, history) : null);
 
     public IReadOnlyList<int> Pool(Game game, IReadOnlyList<Draw> history) =>
         MostOverdue(DrawStatistics.Gap(game, history), DrawStatistics.Frequency(game, history),
@@ -66,9 +68,16 @@ public sealed class BalancedPick : IPickStrategy
 
     public string Name => "balanced";
 
-    public Ticket Pick(Game game, IReadOnlyList<Draw> history, Random rng)
+    public Ticket Pick(Game game, IReadOnlyList<Draw> history, Random rng) => Prepare(game, history)(rng);
+
+    public Func<Random, Ticket> Prepare(Game game, IReadOnlyList<Draw> history)
     {
         var (minSum, maxSum) = SumBounds(game, history);
+        return rng => Pick(game, minSum, maxSum, rng);
+    }
+
+    private static Ticket Pick(Game game, double minSum, double maxSum, Random rng)
+    {
         for (var attempt = 0; attempt < MaxAttempts; attempt++)
         {
             var candidate = PickHelper.Sample(game.AllNumbers, game.PickCount, rng);

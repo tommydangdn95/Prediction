@@ -97,7 +97,10 @@ internal static class BacktestCommand
             $"p được tính từ chênh lệch ghép cặp theo {baseline.TestDraws} kỳ; ngưỡng Bonferroni 5% cho {comparisons.Count} so sánh: " +
             $"[bold]p < {correctedAlpha.ToString("F4", inv)}[/].");
         AnsiConsole.MarkupLine(better.Count == 0
-            ? "[yellow]Không phát hiện chiến lược nào tốt hơn Random ở ngưỡng đã hiệu chỉnh[/]; mẫu nhỏ nên kết quả chỉ mang tính thăm dò."
+            ? "[yellow]Không phát hiện chiến lược nào tốt hơn Random ở ngưỡng đã hiệu chỉnh[/]; " +
+              (baseline.TestDraws < 500
+                  ? "mẫu nhỏ nên kết quả chỉ mang tính thăm dò."
+                  : $"trên {baseline.TestDraws} kỳ, chênh lệch so với Random đều rất nhỏ và không có ý nghĩa thống kê.")
             : $"[yellow]Có bằng chứng thăm dò rằng {Markup.Escape(string.Join(", ", better.Select(c => c.Strategy)))} tốt hơn Random trên mẫu này; cần kiểm chứng bằng dữ liệu mới.[/]");
         Ui.WriteOdds(game);
         AnsiConsole.WriteLine();

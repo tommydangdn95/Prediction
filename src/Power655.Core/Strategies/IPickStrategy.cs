@@ -9,6 +9,12 @@ public interface IPickStrategy
     /// <see cref="Game.PickCount"/> số chính tăng dần, kèm số đặc biệt nếu <see cref="Game.TicketHasSpecial"/>.
     /// </summary>
     Ticket Pick(Game game, IReadOnlyList<Draw> history, Random rng);
+
+    /// <summary>
+    /// Tính thống kê của <paramref name="history"/> một lần rồi trả hàm chọn vé — dùng khi cần nhiều vé cho cùng
+    /// lịch sử (backtest). Kết quả phải giống hệt gọi <see cref="Pick"/> với cùng chuỗi <see cref="Random"/>.
+    /// </summary>
+    Func<Random, Ticket> Prepare(Game game, IReadOnlyList<Draw> history) => rng => Pick(game, history, rng);
 }
 
 internal static class PickHelper
@@ -28,6 +34,10 @@ internal static class PickHelper
         Array.Sort(result);
         return result;
     }
+
+    /// <summary>Hàm chọn vé ngẫu nhiên trong pool số chính (và pool ĐB nếu vé có ĐB) đã tính sẵn.</summary>
+    public static Func<Random, Ticket> FromPools(Game game, IReadOnlyList<int> pool, IReadOnlyList<int>? specialPool) =>
+        rng => new Ticket(Sample(pool, game.PickCount, rng), specialPool is null ? null : SampleSpecial(game, specialPool, rng));
 
     /// <summary>Số đặc biệt ngẫu nhiên trong pool, hoặc null nếu vé của game không có ĐB.</summary>
     public static int? SampleSpecial(Game game, IReadOnlyList<int> pool, Random rng) =>
