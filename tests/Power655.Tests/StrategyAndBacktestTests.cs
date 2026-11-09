@@ -385,4 +385,19 @@ public class DrawScheduleTests
         s.NextFetchTime(Vn(2026, 11, 8, 22, 0)).Should().Be(Vn(2026, 11, 9, 13, 45));
         s.PendingToday(Vn(2026, 11, 8, 22, 0)).Should().BeNull();
     }
+
+    [Fact]
+    public void Next_fetch_time_skips_draws_whose_results_arrived_early()
+    {
+        var lotto = Games.Lotto535.Schedule;
+        // 21:04: đã có cả kỳ 13:00 và 21:00 hôm nay → kỳ kế tiếp là 13:00 hôm sau
+        lotto.NextFetchTime(Vn(2026, 11, 9, 21, 4), resultsToday: 2).Should().Be(Vn(2026, 11, 10, 13, 45));
+        lotto.NextFetchTime(Vn(2026, 11, 9, 21, 4), resultsToday: 1).Should().Be(Vn(2026, 11, 9, 21, 45));
+        lotto.NextFetchTime(Vn(2026, 11, 9, 13, 10), resultsToday: 1).Should().Be(Vn(2026, 11, 9, 21, 45));
+        lotto.NextFetchTime(Vn(2026, 11, 9, 13, 10), resultsToday: 0).Should().Be(Vn(2026, 11, 9, 13, 45));
+
+        var power = Games.Power655.Schedule;
+        power.NextFetchTime(Vn(2026, 11, 10, 18, 30), resultsToday: 1).Should().Be(Vn(2026, 11, 12, 18, 45));
+        power.NextFetchTime(Vn(2026, 11, 10, 18, 30), resultsToday: 0).Should().Be(Vn(2026, 11, 10, 18, 45));
+    }
 }

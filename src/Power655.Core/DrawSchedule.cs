@@ -48,20 +48,28 @@ public sealed class DrawSchedule
     }
 
     /// <summary>Thời điểm nên fetch tiếp theo (mốc "kết quả đã có" kế tiếp, giờ Việt Nam).</summary>
-    public DateTimeOffset NextFetchTime(DateTimeOffset now)
+    public DateTimeOffset NextFetchTime(DateTimeOffset now) => NextFetchTime(now, resultsToday: 0);
+
+    /// <summary>
+    /// Như <see cref="NextFetchTime(DateTimeOffset)"/> nhưng bỏ qua các kỳ hôm nay đã có kết quả
+    /// (<paramref name="resultsToday"/> kỳ đầu ngày) — kết quả thường có trước mốc dự kiến.
+    /// </summary>
+    public DateTimeOffset NextFetchTime(DateTimeOffset now, int resultsToday)
     {
         var local = ToVietnamTime(now);
         var date = DateOnly.FromDateTime(local);
-        TimeOnly slot;
-        if (PendingToday(now) is { } today)
+        if (IsDrawDay(date))
         {
-            slot = today;
+            var time = TimeOnly.FromDateTime(local);
+            for (var i = Math.Max(0, resultsToday); i < ResultsAvailableAt.Count; i++)
+                if (ResultsAvailableAt[i] > time) return At(date, ResultsAvailableAt[i]);
         }
-        else
-        {
-            do date = date.AddDays(1); while (!IsDrawDay(date));
-            slot = ResultsAvailableAt[0];
-        }
+        do date = date.AddDays(1); while (!IsDrawDay(date));
+        return At(date, ResultsAvailableAt[0]);
+    }
+
+    private static DateTimeOffset At(DateOnly date, TimeOnly slot)
+    {
         var localTarget = date.ToDateTime(slot);
         return new DateTimeOffset(localTarget, VietnamTimeZone.GetUtcOffset(localTarget));
     }

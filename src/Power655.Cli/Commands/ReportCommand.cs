@@ -88,7 +88,8 @@ internal static class ReportCommand
             }
 
             var latest = draws[^1];
-            var next = game.Schedule.NextFetchTime(now);
+            // kỳ của hôm nay có thể đã có kết quả trước mốc dự kiến (vd 21:04 đã có kỳ 21:00)
+            var next = game.Schedule.NextFetchTime(now, draws.Count(d => d.Date == DateOnly.FromDateTime(local)));
             sb.AppendLine($"- Kỳ mới nhất: **#{latest.DrawId:D5}** {latest.Date.ToString("dd/MM/yyyy", Inv)} — `{Balls(latest)}`");
             sb.AppendLine($"- Kết quả kỳ kế tiếp có sau: {DrawSchedule.ToVietnamTime(next).ToString("HH:mm dd/MM/yyyy", Inv)}");
             sb.AppendLine($"- Lịch sử dùng để gợi ý: {draws.Count} kỳ (#{draws[0].DrawId:D5} → #{latest.DrawId:D5})");
@@ -182,17 +183,28 @@ internal static class ReportCommand
         var any = PortfolioOdds.AnyPrizeByPrefix(game, tickets);
         var three = game.TicketHasSpecial ? PortfolioOdds.AtLeastByPrefix(game, tickets, 3) : null;
 
+        var p = game.Odds.AnyPrizeProbability;
         sb.AppendLine($"### Bộ khuyến nghị — phủ số ({count} vé)");
         sb.AppendLine();
-        sb.AppendLine("Cách chọn duy nhất có lợi thế đo được: các vé không trùng số nhau" +
-                      (game.TicketHasSpecial ? " và có số ĐB khác nhau" : "") +
-                      " nên ít khi cùng trượt → tăng khả năng có ít nhất 1 vé trúng. Mua **k vé đầu** thì xem dòng thứ k.");
+        sb.AppendLine("Các vé không trùng số nhau" + (game.TicketHasSpecial ? " và có số ĐB khác nhau" : "") +
+                      " nên ít khi cùng trượt — cách chọn duy nhất có lợi thế đo được.");
+        sb.AppendLine();
+        // ví dụ theo thói quen mua 5 vé mỗi kỳ
+        var example = Math.Min(5, count);
+        var exampleAny = any[example - 1];
+        var exampleRange = example == 1 ? "cover 1" : $"cover 1–{example}";
+        sb.AppendLine("**Cách đọc cột %:** số ở mỗi dòng là khả năng có **ít nhất 1 vé trúng giải** nếu bạn mua " +
+                      $"**từ vé 1 đến vé ở dòng đó**. Ví dụ mua {example} vé → mua {exampleRange} → xem dòng cover {example}: " +
+                      $"**{Percent(exampleAny)}**" +
+                      (1 / exampleAny >= 2 ? $", tức khoảng 1 trong {Math.Round(1 / exampleAny).ToString("N0", Ui.Vi)} kỳ có vé trúng" : "") +
+                      $" ({example} vé chọn ngẫu nhiên: {Percent(PortfolioOdds.IndependentAnyPrize(game, example))}). " +
+                      $"Đó không phải khả năng của riêng vé ở dòng đó: mỗi vé riêng lẻ vẫn chỉ trúng {Percent(p)}.");
         sb.AppendLine();
         sb.Append("| Vé | Bộ số |");
         if (game.TicketHasSpecial) sb.Append(" ĐB |");
-        sb.Append(" Mua vé 1→k: P(≥1 vé trúng giải) |");
-        if (three is not null) sb.Append(" P(≥1 vé trùng ≥3 số) |");
-        sb.AppendLine(" k vé chọn ngẫu nhiên |");
+        sb.Append(" Mua từ vé 1 đến vé này: có ≥1 vé trúng |");
+        if (three is not null) sb.Append(" …có ≥1 vé trùng ≥3 số |");
+        sb.AppendLine(" Cùng số vé chọn ngẫu nhiên |");
         sb.Append("|---|---|");
         if (game.TicketHasSpecial) sb.Append("---|");
         sb.Append("---:|");
@@ -213,7 +225,7 @@ internal static class ReportCommand
         if (n > 0)
         {
             var suggestedAny = PortfolioOdds.AnyPrizeByPrefix(game, suggested)[^1];
-            sb.AppendLine($"Cùng {n} vé: {n} bộ theo thống kê ở bảng dưới → {Percent(suggestedAny)}; " +
+            sb.AppendLine($"- Cùng {n} vé: {n} bộ theo thống kê ở bảng dưới → {Percent(suggestedAny)}; " +
                           $"{n} vé chọn ngẫu nhiên → {Percent(PortfolioOdds.IndependentAnyPrize(game, n))}" +
                           (n <= tickets.Count ? $"; {n} vé phủ số → **{Percent(any[n - 1])}**." : "."));
         }
@@ -221,17 +233,39 @@ internal static class ReportCommand
         {
             var others = string.Join(", ", groups.Where(g => g.Strategy != CoverPicker.Name)
                 .Select(g => $"{g.Strategy} {Percent(g.AnyWinRate)}"));
-            sb.AppendLine($"Kiểm chứng trên {real.TestDraws} kỳ đã quay: mỗi kỳ mua {real.GroupSize} vé phủ số → " +
+            sb.AppendLine($"- Kiểm chứng trên {real.TestDraws} kỳ đã quay: mỗi kỳ mua {real.GroupSize} vé phủ số → " +
                           $"**{Percent(real.AnyWinRate)}** số kỳ có vé trúng; {real.GroupSize} vé theo {others}.");
         }
-        var p = game.Odds.AnyPrizeProbability;
-        sb.AppendLine($"Mỗi vé vẫn trúng với xác suất {Percent(p)} nên số vé trúng kỳ vọng và tiền thưởng kỳ vọng không đổi; " +
-                      "phủ số chỉ làm giảm khả năng cả nhóm vé cùng trắng tay.");
-        if (game.TicketHasSpecial)
-            sb.AppendLine($"Với {game.Name}, giải Khuyến khích chỉ cần trùng số ĐB nên số ĐB khác nhau là yếu tố chính; " +
-                          $"{game.SpecialMax} vé có đủ {game.SpecialMax} số ĐB khác nhau thì kỳ nào cũng có ít nhất 1 vé trúng giải.");
+        sb.AppendLine("- " + GameCoverNote(game, example));
+        var top = game.Odds.Table[0];
+        sb.AppendLine($"- {top.Prize} ({top.Condition}): {count} vé khác nhau có khả năng đúng bằng {count} lần một vé — " +
+                      $"khoảng 1 trên {(1 / (count * top.Probability)).ToString("N0", Ui.Vi)}, chọn số kiểu gì cũng vậy.");
+        sb.AppendLine("- Tiền thưởng trung bình không đổi theo cách chọn số; phủ số chỉ làm giảm số kỳ cả nhóm vé cùng trắng tay.");
         sb.AppendLine();
         return any[^1];
+    }
+
+    /// <summary>Vì sao phủ số giúp nhiều hay ít ở từng game.</summary>
+    private static string GameCoverNote(Game game, int example)
+    {
+        // hạng giải dễ trúng nhất chiếm phần lớn "trúng giải bất kỳ"
+        var common = game.Odds.Table.MaxBy(o => o.Probability)!;
+        var share = Math.Round(common.Probability / game.Odds.AnyPrizeProbability * 100).ToString("N0", Ui.Vi) + " %";
+        return game.Special switch
+        {
+            SpecialKind.SeparatePool =>
+                $"Với {game.Name}: giải {common.Prize} ({common.Condition}) chiếm {share} số lần trúng và chỉ cần trùng số ĐB " +
+                $"(01–{game.SpecialMax:D2}), nên số ĐB khác nhau là lợi thế chính: {example} vé phủ {example}/{game.SpecialMax} " +
+                $"khả năng của số ĐB; {game.SpecialMax} vé có đủ {game.SpecialMax} số ĐB thì kỳ nào cũng có vé trúng.",
+            SpecialKind.BonusFromMainPool =>
+                $"Với {game.Name}: số ĐB là quả thứ 7 quay cùng lồng, chỉ dùng cho giải 5 số + ĐB, nên không có giải nào chỉ cần " +
+                $"trùng ĐB; {share} số lần trúng là {common.Prize} ({common.Condition}). Phủ số vì vậy chỉ hơn chọn ngẫu nhiên " +
+                "một chút; khác biệt rõ hơn khi so với hot/cold (cả nhóm vé lấy từ cùng một nhóm số nên hay cùng trượt).",
+            _ =>
+                $"Với {game.Name}: vé không có số ĐB và {share} số lần trúng là {common.Prize} ({common.Condition}). " +
+                "Phủ số vì vậy chỉ hơn chọn ngẫu nhiên một chút; khác biệt rõ hơn khi so với hot/cold " +
+                "(cả nhóm vé lấy từ cùng một nhóm số nên hay cùng trượt).",
+        };
     }
 
     /// <summary>Mua nhóm <paramref name="groupSize"/> vé mỗi kỳ trên lịch sử thật: phủ số trước, random cuối.</summary>

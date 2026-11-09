@@ -58,8 +58,8 @@ internal static class SuggestCommand
         var any = PortfolioOdds.AnyPrizeByPrefix(game, tickets);
         var table = new Table().Border(TableBorder.Rounded).AddColumn("#").AddColumn("Bộ số");
         if (game.TicketHasSpecial) table.AddColumn("ĐB");
-        table.AddColumn(new TableColumn("Mua vé 1→#: P(≥1 vé trúng)").RightAligned())
-            .AddColumn(new TableColumn("# vé ngẫu nhiên").RightAligned());
+        table.AddColumn(new TableColumn("Mua từ vé 1 đến vé này: có ≥1 vé trúng").RightAligned())
+            .AddColumn(new TableColumn("Cùng số vé ngẫu nhiên").RightAligned());
         for (var k = 1; k <= tickets.Count; k++)
         {
             var t = tickets[k - 1];
@@ -71,8 +71,9 @@ internal static class SuggestCommand
         }
         AnsiConsole.MarkupLine($"Bộ phủ số {count} vé · seed {seedValue} (không dùng lịch sử)");
         AnsiConsole.Write(table);
-        AnsiConsole.MarkupLine("[grey]Mỗi vé có xác suất như mọi vé khác; số vé trúng kỳ vọng và tiền thưởng kỳ vọng không đổi. " +
-                               "Phủ số chỉ giảm khả năng cả nhóm vé cùng trắng tay.[/]");
+        AnsiConsole.MarkupLine("[grey]Cột %: khả năng có ít nhất 1 vé trúng nếu mua từ vé 1 đến vé ở dòng đó (mua 5 vé → xem dòng 5). " +
+                               $"Mỗi vé riêng lẻ vẫn chỉ trúng {Ui.Percent(game.Odds.AnyPrizeProbability)}; tiền thưởng trung bình không đổi, " +
+                               "phủ số chỉ giảm số kỳ cả nhóm vé cùng trắng tay.[/]");
         Ui.WriteOdds(game);
         AnsiConsole.WriteLine();
     }
