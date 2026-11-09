@@ -307,9 +307,16 @@ internal static class ReportCommand
             || groups.FirstOrDefault(g => g.Strategy == "random") is not { } random) return;
 
         static string Money(double value) => Ui.Money((long)Math.Round(value));
-        string Line(GroupBacktestResult g) =>
-            $"{g.Strategy} → {Percent(g.AnyWinRate)}" +
-            (g.AnyWinRate > 0 && 1 / g.AnyWinRate >= 2 ? $" (khoảng 1 trong {Math.Round(1 / g.AnyWinRate).ToString("N0", Ui.Vi)} kỳ)" : "");
+        // tỉ lệ thấp: "1 trong 6 kỳ"; tỉ lệ cao: "7 trong 10 kỳ" (1 trong 1 kỳ vô nghĩa)
+        static string Often(double rate) => rate switch
+        {
+            <= 0 or double.NaN => "",
+            < 0.5 => $" (khoảng 1 trong {Math.Round(1 / rate).ToString("N0", Ui.Vi)} kỳ)",
+            < 0.95 => $" (khoảng {Math.Round(rate * 10).ToString("N0", Ui.Vi)} trong 10 kỳ)",
+            < 1 => " (hơn 9 trong 10 kỳ)",
+            _ => " (mọi kỳ)",
+        };
+        string Line(GroupBacktestResult g) => $"{g.Strategy} → {Percent(g.AnyWinRate)}{Often(g.AnyWinRate)}";
 
         var n = cover.GroupSize;
         sb.AppendLine($"**Thử lại trên lịch sử:** nếu {cover.TestDraws.ToString("N0", Ui.Vi)} kỳ đã quay " +
