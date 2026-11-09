@@ -7,12 +7,16 @@ namespace Power655.Core;
 /// </summary>
 public sealed class DrawSchedule
 {
-    public DrawSchedule(IReadOnlyList<DayOfWeek> drawDays, IReadOnlyList<TimeOnly> resultsAvailableAt)
+    public DrawSchedule(IReadOnlyList<DayOfWeek> drawDays, IReadOnlyList<TimeOnly> resultsAvailableAt,
+        IReadOnlyList<TimeOnly>? drawStartsAt = null)
     {
         if (drawDays.Count == 0) throw new ArgumentException("Cần ít nhất 1 ngày quay.", nameof(drawDays));
         if (resultsAvailableAt.Count == 0) throw new ArgumentException("Cần ít nhất 1 mốc giờ.", nameof(resultsAvailableAt));
         DrawDays = drawDays;
         ResultsAvailableAt = resultsAvailableAt.Order().ToArray();
+        DrawStartsAt = (drawStartsAt ?? resultsAvailableAt.Select(t => t.AddMinutes(-45)).ToArray()).Order().ToArray();
+        if (DrawStartsAt.Count != ResultsAvailableAt.Count)
+            throw new ArgumentException("Số mốc bắt đầu quay và có kết quả phải bằng nhau.", nameof(drawStartsAt));
     }
 
     public IReadOnlyList<DayOfWeek> DrawDays { get; }
@@ -20,12 +24,36 @@ public sealed class DrawSchedule
     /// <summary>Các mốc trong ngày (tăng dần) mà kết quả kỳ tương ứng coi là đã có.</summary>
     public IReadOnlyList<TimeOnly> ResultsAvailableAt { get; }
 
+    /// <summary>Giờ bắt đầu quay; dự đoán phải được lưu TRƯỚC mốc này, không phải mốc fetch.</summary>
+    public IReadOnlyList<TimeOnly> DrawStartsAt { get; }
+
     public static TimeZoneInfo VietnamTimeZone { get; } = ResolveVietnamTimeZone();
 
     public bool IsDrawDay(DateOnly date) => DrawDays.Contains(date.DayOfWeek);
 
     public static DateTime ToVietnamTime(DateTimeOffset instant) =>
         TimeZoneInfo.ConvertTime(instant, VietnamTimeZone).DateTime;
+
+    /// <summary>Kỳ theo lịch ngay sau một thời điểm, tính theo giờ bắt đầu quay.</summary>
+    public DateTimeOffset NextDrawTime(DateTimeOffset after)
+    {
+        var local = ToVietnamTime(after);
+        var date = DateOnly.FromDateTime(local);
+        if (IsDrawDay(date))
+            foreach (var slot in DrawStartsAt)
+                if (At(date, slot) > after) return At(date, slot);
+        do date = date.AddDays(1); while (!IsDrawDay(date));
+        return At(date, DrawStartsAt[0]);
+    }
+
+    public bool IsDrawTime(DateTimeOffset instant)
+    {
+        var local = ToVietnamTime(instant);
+        return IsDrawDay(DateOnly.FromDateTime(local)) && DrawStartsAt.Contains(TimeOnly.FromDateTime(local));
+    }
+
+    /// <summary>Giờ bắt đầu của một kỳ trong ngày, chỉ số từ 0.</summary>
+    public DateTimeOffset DrawTime(DateOnly date, int slot) => At(date, DrawStartsAt[slot]);
 
     /// <summary>Ngày quay gần nhất mà kết quả đã có tại thời điểm <paramref name="now"/>.</summary>
     public DateOnly LatestAvailableDrawDate(DateTimeOffset now)

@@ -7,8 +7,8 @@ namespace Power655.Core;
 /// (mọi C(N,k) bộ số chính × mọi số ĐB).
 /// <para>
 /// Từng vé luôn có cùng xác suất trúng. Nhưng các vé trùng nhiều số với nhau thì hay trúng/trượt cùng lúc,
-/// nên với cùng số vé, nhóm vé phủ rộng có P(ít nhất một vé trúng) cao hơn. Số vé trúng kỳ vọng
-/// (= số vé × p) — và tiền thưởng kỳ vọng — không đổi theo cách chọn.
+/// nên với cùng số vé, nhóm vé phủ rộng có thể có P(ít nhất một vé trúng) cao hơn. Số vé trúng kỳ vọng
+/// (= số vé × p) không đổi theo cách chọn. Trúng giải không đồng nghĩa với có lãi.
 /// </para>
 /// </summary>
 public static class PortfolioOdds
@@ -27,6 +27,30 @@ public static class PortfolioOdds
     /// </summary>
     public static double IndependentAnyPrize(Game game, int tickets) =>
         1 - Math.Pow(1 - game.Odds.AnyPrizeProbability, tickets);
+
+    /// <summary>
+    /// P(ít nhất một giải) của nhóm vé ngẫu nhiên đều KHÁC NHAU (lấy mẫu không hoàn lại).
+    /// Cùng chính sách không mua trùng vé như TicketGroups; đây là trung bình trên các nhóm ngẫu nhiên.
+    /// </summary>
+    public static double UniformDistinctAnyPrize(Game game, int tickets)
+    {
+        ArgumentNullException.ThrowIfNull(game);
+        ArgumentOutOfRangeException.ThrowIfNegative(tickets);
+        var total = game.Odds.TicketCombinations;
+        if (tickets > total) throw new ArgumentOutOfRangeException(nameof(tickets));
+        if (tickets == 0) return 0;
+        // Số vé thắng đối với một kết quả cố định là số nguyên; đối xứng giữa các kết quả quay.
+        var winners = (long)Math.Round(total * game.Odds.AnyPrizeProbability);
+        if (tickets > total - winners) return 1;
+        double any = 0;
+        for (var i = 0; i < tickets; i++)
+        {
+            // P(any sau i+1) = P(any sau i) + P(chưa thắng) × P(vé kế tiếp thắng).
+            // Tránh triệt tiêu số khi lấy 1 − tích gần 1.
+            any += (1 - any) * winners / (total - i);
+        }
+        return any;
+    }
 
     /// <param name="wins">Vé có trúng không, theo (số chính trùng, có trùng ĐB không).</param>
     /// <returns>Phần tử i = P(ít nhất một trong i+1 vé đầu thỏa <paramref name="wins"/>).</returns>

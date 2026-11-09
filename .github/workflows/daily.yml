@@ -21,6 +21,7 @@ env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
   POWER655_DB: ${{ github.workspace }}/data/power655.db
+  POWER655_CODE_VERSION: ${{ github.sha }}
   CLI: src/Power655.Cli/bin/Release/net8.0/power655
 
 jobs:
@@ -63,7 +64,16 @@ jobs:
         run: |
           today=$(TZ=Asia/Ho_Chi_Minh date +%Y-%m-%d)
           $CLI export --csv data/history.csv
-          $CLI report --out "predictions/${today}.md"
+          # Markdown is presentation; the report keeps the first forecast per game/draw in predictions/ledger/.
+          set +e
+          $CLI report --predictions predictions --out "predictions/${today}.md"
+          code=$?
+          set -e
+          if [ "$code" = "2" ]; then
+            echo "::warning::Một số game chưa đủ dữ liệu mới; báo cáo đánh dấu và không tạo dự đoán cho kỳ đã bắt đầu."
+          elif [ "$code" != "0" ]; then
+            exit "$code"
+          fi
           cp "predictions/${today}.md" predictions/LATEST.md
           cat predictions/LATEST.md >> "$GITHUB_STEP_SUMMARY"
 

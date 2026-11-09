@@ -14,7 +14,7 @@ internal static class SuggestCommand
     {
         var strategy = new Option<string>("--strategy", "-s")
         {
-            Description = "Chiến lược: " + string.Join("|", Names) + " (cover = phủ số: nhóm vé ít trùng nhau nhất)",
+            Description = "Chiến lược: " + string.Join("|", Names) + " (cover = ưu tiên giảm trùng số giữa các vé)",
             DefaultValueFactory = _ => "balanced",
         };
         strategy.AcceptOnlyFromAmong(Names);
@@ -59,21 +59,22 @@ internal static class SuggestCommand
         var table = new Table().Border(TableBorder.Rounded).AddColumn("#").AddColumn("Bộ số");
         if (game.TicketHasSpecial) table.AddColumn("ĐB");
         table.AddColumn(new TableColumn("Mua từ vé 1 đến vé này: có ≥1 vé trúng").RightAligned())
-            .AddColumn(new TableColumn("Cùng số vé ngẫu nhiên").RightAligned());
+            .AddColumn(new TableColumn("Cùng số vé ngẫu nhiên khác nhau").RightAligned());
         for (var k = 1; k <= tickets.Count; k++)
         {
             var t = tickets[k - 1];
             var cells = new List<string> { k.ToString(CultureInfo.InvariantCulture), $"[bold]{Ui.Balls(t.Numbers)}[/]" };
             if (game.TicketHasSpecial) cells.Add($"[bold yellow]{Ui.Ball(t.Special!.Value)}[/]");
             cells.Add($"[green]{Ui.Percent(any[k - 1])}[/]");
-            cells.Add(Ui.Percent(PortfolioOdds.IndependentAnyPrize(game, k)));
+            cells.Add(Ui.Percent(PortfolioOdds.UniformDistinctAnyPrize(game, k)));
             table.AddRow(cells.ToArray());
         }
         AnsiConsole.MarkupLine($"Bộ phủ số {count} vé · seed {seedValue} (không dùng lịch sử)");
+        WriteCost(count);
         AnsiConsole.Write(table);
         AnsiConsole.MarkupLine("[grey]Cột %: khả năng có ít nhất 1 vé trúng nếu mua từ vé 1 đến vé ở dòng đó (mua 5 vé → xem dòng 5). " +
-                               $"Mỗi vé riêng lẻ vẫn chỉ trúng {Ui.Percent(game.Odds.AnyPrizeProbability)}; tiền thưởng trung bình không đổi, " +
-                               "phủ số chỉ giảm số kỳ cả nhóm vé cùng trắng tay.[/]");
+                               $"Mỗi vé riêng lẻ vẫn chỉ trúng {Ui.Percent(game.Odds.AnyPrizeProbability)}. " +
+                               "Trúng giải bất kỳ không đồng nghĩa với hòa vốn hoặc có lãi; phủ số không bảo đảm nhóm tối ưu.[/]");
         Ui.WriteOdds(game);
         AnsiConsole.WriteLine();
     }
@@ -90,9 +91,10 @@ internal static class SuggestCommand
             : [StrategyCatalog.Create(name), StrategyCatalog.Create("random")];
         foreach (var s in strategies)
         {
+            var tickets = TicketGroups.PickUnique(game, s, history, count, rng);
             for (var i = 1; i <= count; i++)
             {
-                var ticket = s.Pick(game, history, rng);
+                var ticket = tickets[i - 1];
                 var pick = ticket.Numbers;
                 var even = pick.Count(n => n % 2 == 0);
                 var low = pick.Count(n => n <= game.LowHighBoundary);
@@ -110,9 +112,16 @@ internal static class SuggestCommand
             ? $" (#{history[0].DrawId:D5} → #{history[^1].DrawId:D5} {history[^1].Date:dd/MM/yyyy})"
             : "";
         AnsiConsole.MarkupLine($"Gợi ý từ {history.Count} kỳ lịch sử{range} · seed {seedValue}");
+        WriteCost(count);
+        if (name != "random")
+            AnsiConsole.MarkupLine("[grey]Chi phí trên cho một nhóm chiến lược; nhóm random là phương án đối chứng riêng.[/]");
         AnsiConsole.Write(table);
         AnsiConsole.MarkupLine("[grey]Mọi bộ số — kể cả bộ ngẫu nhiên — có cùng xác suất trúng. Bộ gợi ý chỉ phản ánh đặc điểm dữ liệu quá khứ.[/]");
         Ui.WriteOdds(game);
         AnsiConsole.WriteLine();
     }
+
+    private static void WriteCost(int count) =>
+        AnsiConsole.MarkupLine($"Giá một vé: {TicketEconomics.TicketPrice.ToString("N0", Ui.Vi)}đ · " +
+                              $"{count} vé: {(count * TicketEconomics.TicketPrice).ToString("N0", Ui.Vi)}đ.");
 }

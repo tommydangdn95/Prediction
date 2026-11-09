@@ -16,6 +16,8 @@ internal static class Ui
     /// <summary>Phần trăm với đủ chữ số có nghĩa cho cả xác suất rất nhỏ (vd 0,0000257 %).</summary>
     public static string Percent(double p)
     {
+        if (!double.IsFinite(p)) return "-";
+        if (p < 0) return "-" + Percent(-p);
         var v = p * 100;
         if (v == 0) return "0 %";
         var digits = v >= 1 ? 2 : Math.Min(10, 2 - (int)Math.Floor(Math.Log10(v)));

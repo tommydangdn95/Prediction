@@ -25,14 +25,16 @@ internal static class ReportCommand
         runs.Min(0);
         var train = new Option<int>("--train") { Description = "Số kỳ train cho backtest", DefaultValueFactory = _ => 20 };
         train.Min(1);
-        var archive = new Option<DirectoryInfo?>("--predictions") { Description = "Thư mục báo cáo cũ để đối chiếu với kết quả thật (mặc định: predictions)" };
+        var archive = new Option<DirectoryInfo?>("--predictions") { Description = "Thư mục lưu sổ dự đoán theo kỳ (mặc định: predictions; chỉ ghi khi có --out)" };
+        var from = new Option<int?>("--from-draw") { Description = "Chỉ đánh giá từ ID kỳ này; giữ lịch sử trước đó để chọn số" };
+        from.Validators.Add(r => { if (r.GetValueOrDefault<int?>() is <= 0) r.AddError("--from-draw phải > 0."); });
         var cover = new Option<int?>("--cover") { Description = "Số vé bộ phủ số mỗi game (mặc định = tổng số bộ gợi ý = 4 × --sets; 0 = bỏ)" };
         cover.Validators.Add(r =>
         {
             if (r.GetValueOrDefault<int?>() is < 0) r.AddError("--cover phải ≥ 0.");
         });
 
-        var command = new Command("report", "Xuất báo cáo gợi ý dạng Markdown cho các game được chọn.") { output, sets, seed, runs, train, archive, cover };
+        var command = new Command("report", "Xuất báo cáo gợi ý dạng Markdown cho các game được chọn.") { output, sets, seed, runs, train, archive, cover, from };
         command.SetAction(async (result, ct) =>
         {
             var now = DateTimeOffset.Now;
@@ -41,10 +43,40 @@ internal static class ReportCommand
             var data = await globals.LoadDrawsAsync(result, 0, ct);
 
             var archiveDir = result.GetValue(archive)?.FullName ?? "predictions";
-            var reviews = PredictionArchive.Review(PredictionArchive.Load(archiveDir, today), data.SelectMany(x => x.Draws));
+            var saved = PredictionLedger.Load(archiveDir);
+            var reviews = PredictionLedger.Review(saved, data.SelectMany(x => x.Draws));
+            var forecasts = new Dictionary<string, LedgerPrediction>();
+            var setCount = result.GetValue(sets);
+            var coverCount = result.GetValue(cover) ?? checked(4 * setCount);
+            var persist = result.GetValue(output) is not null;
+            var version = CodeVersion();
+            foreach (var (game, draws) in data)
+            {
+                var assessment = PredictionLedger.AssessTarget(game, draws, DateTimeOffset.Now);
+                if (!assessment.IsReady) continue;
+                var existing = saved.FirstOrDefault(p => p.GameCode == game.Code && p.TargetDrawId == assessment.TargetDrawId);
+                if (existing is not null)
+                {
+                    forecasts[game.Code] = existing;
+                    continue;
+                }
+                var tickets = CreateSuggestions(game, draws, seedValue, setCount, coverCount);
+                // Stamp after generating the tickets; Create checks the cutoff again.
+                if (!PredictionLedger.AssessTarget(game, draws, DateTimeOffset.Now).IsReady) continue;
+                try
+                {
+                    var proposal = PredictionLedger.Create(game, draws, DateTimeOffset.Now, seedValue,
+                        $"sets={setCount};cover={coverCount};unique-v2", version, tickets);
+                    forecasts[game.Code] = persist ? PredictionLedger.SaveOrLoad(archiveDir, proposal) : proposal;
+                }
+                catch (InvalidOperationException) when (!PredictionLedger.AssessTarget(game, draws, DateTimeOffset.Now).IsReady)
+                {
+                    // The draw started while saving. Keep valid forecasts for the other games.
+                }
+            }
 
             var markdown = Build(data, now, seedValue, result.GetValue(sets), result.GetValue(runs), result.GetValue(train), reviews,
-                result.GetValue(cover));
+                result.GetValue(cover), forecasts, persist, result.GetValue(from));
 
             if (result.GetValue(output) is { } file)
             {
@@ -56,15 +88,32 @@ internal static class ReportCommand
             {
                 Console.Out.Write(markdown);
             }
-            return data.Any(x => x.Draws.Count == 0) ? 2 : 0;
+            return data.Any(x => !forecasts.ContainsKey(x.Game.Code)) ? 2 : 0;
         });
         return command;
+    }
+
+    /// <summary>Biến môi trường chứa commit SHA (workflow đặt) để biết vé được tạo từ code nào.</summary>
+    internal const string CodeVersionEnvVar = "POWER655_CODE_VERSION";
+
+    /// <summary>
+    /// Commit SHA khi chạy trên GitHub Actions; luôn kèm định danh build của hai assembly để phân biệt
+    /// cả khi chạy ở máy với code chưa commit.
+    /// </summary>
+    internal static string CodeVersion()
+    {
+        var build = $"cli:{typeof(ReportCommand).Assembly.ManifestModule.ModuleVersionId:D};" +
+                    $"core:{typeof(Backtester).Assembly.ManifestModule.ModuleVersionId:D}";
+        return Environment.GetEnvironmentVariable(CodeVersionEnvVar) is { Length: > 0 } sha
+            ? $"git:{sha.Trim()};{build}"
+            : build;
     }
 
     internal static string Build(
         IReadOnlyList<(Game Game, IReadOnlyList<Draw> Draws)> data,
         DateTimeOffset now, int seed, int sets, int runs, int train,
-        IReadOnlyList<PredictionReview>? reviews = null, int? cover = null)
+        IReadOnlyList<PredictionReview>? reviews = null, int? cover = null,
+        IReadOnlyDictionary<string, LedgerPrediction>? forecasts = null, bool persisted = false, int? testFromDrawId = null)
     {
         var local = DrawSchedule.ToVietnamTime(now);
         var sb = new StringBuilder();
@@ -73,7 +122,8 @@ internal static class ReportCommand
         sb.AppendLine($"> **{Odds.Disclaimer}**");
         sb.AppendLine("> Mọi bộ số — kể cả bộ ngẫu nhiên — có cùng xác suất trúng. Bộ gợi ý chỉ phản ánh đặc điểm dữ liệu quá khứ.");
         sb.AppendLine();
-        sb.AppendLine($"Tạo lúc {local.ToString("HH:mm dd/MM/yyyy", Inv)} (giờ VN) · seed `{seed}` · {sets} bộ mỗi chiến lược.");
+        sb.AppendLine($"Tạo báo cáo lúc {local.ToString("HH:mm dd/MM/yyyy", Inv)} (giờ VN). Mỗi cách chọn là một phương án mua riêng.");
+        if (!persisted) sb.AppendLine("Bản xem trước; chạy với `--out` để lưu dự đoán theo kỳ trước giờ quay.");
         sb.AppendLine();
 
         foreach (var (game, draws) in data)
@@ -88,33 +138,51 @@ internal static class ReportCommand
             }
 
             var latest = draws[^1];
-            // kỳ của hôm nay có thể đã có kết quả trước mốc dự kiến (vd 21:04 đã có kỳ 21:00)
-            var next = game.Schedule.NextFetchTime(now, draws.Count(d => d.Date == DateOnly.FromDateTime(local)));
             sb.AppendLine($"- Kỳ mới nhất: **#{latest.DrawId:D5}** {latest.Date.ToString("dd/MM/yyyy", Inv)} — `{Balls(latest)}`");
-            sb.AppendLine($"- Kết quả kỳ kế tiếp có sau: {DrawSchedule.ToVietnamTime(next).ToString("HH:mm dd/MM/yyyy", Inv)}");
             sb.AppendLine($"- Lịch sử dùng để gợi ý: {draws.Count} kỳ (#{draws[0].DrawId:D5} → #{latest.DrawId:D5})");
             WriteFrequency(sb, game, draws);
             sb.AppendLine();
 
             WriteReview(sb, game, reviews ?? []);
 
-            // bộ theo thống kê sinh trước (cùng RNG như mọi phiên bản trước) nhưng in sau bộ khuyến nghị
+            var assessment = PredictionLedger.AssessTarget(game, draws, now);
+            var forecast = forecasts?.GetValueOrDefault(game.Code);
+            if ((forecast is null && forecasts is not null) || !assessment.IsReady)
+            {
+                sb.AppendLine($"**Chưa tạo dự đoán mới:** {assessment.Reason ?? "Kỳ mục tiêu đã bắt đầu trong lúc tạo báo cáo; cần cập nhật kết quả."}");
+                sb.AppendLine();
+                WriteOdds(sb, game);
+                WriteRecent(sb, game, draws);
+                continue;
+            }
+            var entries = forecast?.ToPredictionSet().Tickets ?? CreateSuggestions(game, draws, seed, sets, cover ?? checked(4 * sets));
+            sb.AppendLine($"- Kỳ mục tiêu: **#{assessment.TargetDrawId:D5}**, bắt đầu {DrawSchedule.ToVietnamTime(assessment.TargetDrawAt!.Value):HH:mm dd/MM/yyyy} (giờ VN).");
+            if (forecast is not null)
+            {
+                sb.AppendLine($"- Bộ số tạo lúc {DrawSchedule.ToVietnamTime(forecast.GeneratedAt):HH:mm:ss dd/MM/yyyy} · seed `{forecast.Seed}` · `{forecast.Configuration}`." +
+                    (persisted ? " Chạy lại cùng kỳ giữ nguyên bộ đã lưu." : " Bản xem trước dùng các vé này."));
+                if (PredictionLedger.HashInputs(draws) != forecast.InputHash)
+                    sb.AppendLine("- Lịch sử hiện tại đã thay đổi so với đầu vào lúc lưu dự đoán; giữ nguyên vé đã chốt và không tính bản này vào thành tích nếu không còn đối chiếu được đầu vào.");
+            }
+            sb.AppendLine();
             var statistical = new StringBuilder();
-            var suggested = WriteSuggestions(statistical, game, draws, seed, sets);
-            var coverCount = cover ?? suggested.Count;
+            WriteSuggestions(statistical, game, entries.Where(t => t.Strategy != CoverPicker.Name).ToList());
+            var coverTickets = entries.Where(t => t.Strategy == CoverPicker.Name).Select(t => t.Ticket).ToList();
+            var coverCount = coverTickets.Count;
             var groups = runs > 0 && coverCount > 0 && draws.Count > train
-                ? RunGroupBacktests(game, draws, coverCount, runs, train, seed)
+                ? RunGroupBacktests(game, draws, coverCount, runs, train, seed, testFromDrawId)
                 : [];
-            var coverExact = WriteCover(sb, game, seed, coverCount, suggested, groups);
+            WriteCover(sb, game, coverTickets);
+            WriteGroupSummary(sb, groups);
 
             sb.AppendLine("### Bộ theo thống kê (tham khảo)");
             sb.AppendLine();
             sb.AppendLine("Chọn theo tần suất (hot), số gan (cold), cân bằng chẵn/lẻ–nhỏ/lớn (balanced). " +
-                          "Backtest bên dưới cho thấy các cách này không trúng nhiều hơn chọn ngẫu nhiên.");
+                          "Các quy tắc này chưa chứng minh dự đoán kỳ sau tốt hơn ngẫu nhiên. Mỗi nhóm được loại vé trùng hoàn toàn.");
             sb.AppendLine();
             sb.Append(statistical);
             WriteTicketChances(sb, game);
-            if (runs > 0) WriteBacktest(sb, game, draws, seed, runs, train, groups, coverExact);
+            if (runs > 0) WriteBacktest(sb, game, draws, seed, runs, train, groups, testFromDrawId, data.Count);
             WriteOdds(sb, game);
             WriteRecent(sb, game, draws);
         }
@@ -131,17 +199,27 @@ internal static class ReportCommand
         sb.AppendLine($"- Tỉ lệ một số bất kỳ có mặt trong kết quả: kỳ vọng {Percent((double)game.PickCount / game.MaxNumber)} số kỳ; " +
                       $"thực tế từ {Percent(Rate(least.Value))} (số {Ui.Ball(least.Key)}) đến {Percent(Rate(most.Value))} (số {Ui.Ball(most.Key)}).");
         var chi = DrawStatistics.ChiSquareUniform(game, draws);
-        sb.AppendLine($"- Kiểm định ngẫu nhiên χ² trên {draws.Count} kỳ: p = {chi.PValue.ToString("F3", Inv)} → " +
+        sb.AppendLine($"- Kiểm định tần suất χ² đã hiệu chỉnh rút không hoàn lại trên {draws.Count} kỳ: p = {chi.PValue.ToString("F4", Inv)} → " +
                       (chi.PValue < 0.05
-                          ? "**lệch so với phân phối đều** (p < 0,05 vẫn xảy ra 1/20 lần dù máy quay hoàn toàn ngẫu nhiên — cần theo dõi thêm)."
-                          : "chênh lệch trên nằm trong dao động ngẫu nhiên — tần suất quá khứ không giúp dự đoán kỳ sau."));
+                          ? "có dấu hiệu lệch tần suất ở ngưỡng 5% chưa hiệu chỉnh nhiều phép thử."
+                          : "chưa bác bỏ giả thuyết tần suất đều."));
+        sb.AppendLine("  Đây là kiểm định tần suất riêng lẻ, không chứng minh tính độc lập hay khả năng dự đoán. p là xấp xỉ; cần thận trọng khi ít dữ liệu và khi thử nhiều game/nhiều lần.");
     }
 
-    /// <summary>Bảng bộ số theo từng chiến lược; trả về các vé theo thứ tự in.</summary>
-    private static List<Ticket> WriteSuggestions(StringBuilder sb, Game game, IReadOnlyList<Draw> history, int seed, int sets)
+    private static IReadOnlyList<SuggestedTicket> CreateSuggestions(Game game, IReadOnlyList<Draw> history, int seed, int sets, int cover)
     {
-        var tickets = new List<Ticket>();
+        var tickets = new List<SuggestedTicket>();
         var rng = new Random(SuggestCommand.GameSeed(seed, game));
+        foreach (var name in new[] { "hot", "cold", "balanced", "random" })
+            tickets.AddRange(TicketGroups.PickUnique(game, StrategyCatalog.Create(name), history, sets, rng, tickets.Select(t => t.Ticket))
+                .Select(t => new SuggestedTicket(name, t)));
+        var coverRng = new Random(unchecked(SuggestCommand.GameSeed(seed, game) * 7919 + 1));
+        tickets.AddRange(CoverPicker.Pick(game, cover, coverRng).Select(t => new SuggestedTicket(CoverPicker.Name, t)));
+        return tickets;
+    }
+
+    private static void WriteSuggestions(StringBuilder sb, Game game, IReadOnlyList<SuggestedTicket> suggestions)
+    {
         sb.Append("| Chiến lược | Bộ số |");
         if (game.TicketHasSpecial) sb.Append(" ĐB |");
         sb.AppendLine($" Chẵn/Lẻ | Nhỏ/Lớn (≤{game.LowHighBoundary}) | Tổng |");
@@ -149,45 +227,35 @@ internal static class ReportCommand
         if (game.TicketHasSpecial) sb.Append("---|");
         sb.AppendLine("---|---|---:|");
 
-        // random cuối cùng làm đối chứng
-        foreach (var name in new[] { "hot", "cold", "balanced", "random" })
+        foreach (var suggestion in suggestions)
         {
-            var strategy = StrategyCatalog.Create(name);
-            for (var i = 0; i < sets; i++)
-            {
-                var t = strategy.Pick(game, history, rng);
-                tickets.Add(t);
-                var even = t.Numbers.Count(n => n % 2 == 0);
-                var low = t.Numbers.Count(n => n <= game.LowHighBoundary);
-                var label = name == "random" ? "random (đối chứng)" : name;
-                sb.Append($"| {label} | `{Ui.Balls(t.Numbers)}` |");
-                if (game.TicketHasSpecial) sb.Append($" `{Ui.Ball(t.Special!.Value)}` |");
-                sb.AppendLine($" {even}/{t.Numbers.Count - even} | {low}/{t.Numbers.Count - low} | {t.Numbers.Sum()} |");
-            }
+            var t = suggestion.Ticket;
+            var even = t.Numbers.Count(n => n % 2 == 0);
+            var low = t.Numbers.Count(n => n <= game.LowHighBoundary);
+            var label = suggestion.Strategy == "random" ? "random (đối chứng)" : suggestion.Strategy;
+            sb.Append($"| {label} | `{Ui.Balls(t.Numbers)}` |");
+            if (game.TicketHasSpecial) sb.Append($" `{Ui.Ball(t.Special!.Value)}` |");
+            sb.AppendLine($" {even}/{t.Numbers.Count - even} | {low}/{t.Numbers.Count - low} | {t.Numbers.Sum()} |");
         }
         sb.AppendLine();
-        return tickets;
     }
 
     /// <summary>
-    /// Bộ phủ số: các vé ít trùng nhau nhất → P(ít nhất một vé trúng) cao nhất cho cùng số vé.
-    /// Tính chính xác bằng <see cref="PortfolioOdds"/>, so với cùng số vé ngẫu nhiên và với các bộ gợi ý ở trên.
+    /// Tính xác suất chính xác cho nhóm vé cụ thể, không khẳng định thuật toán tìm được nhóm tối ưu.
     /// </summary>
-    private static double? WriteCover(
-        StringBuilder sb, Game game, int seed, int count, IReadOnlyList<Ticket> suggested, IReadOnlyList<GroupBacktestResult> groups)
+    private static void WriteCover(StringBuilder sb, Game game, IReadOnlyList<Ticket> tickets)
     {
-        if (count <= 0) return null;
-        // RNG riêng để các bộ gợi ý ở trên giữ nguyên như trước khi có bộ phủ số
-        var rng = new Random(unchecked(SuggestCommand.GameSeed(seed, game) * 7919 + 1));
-        var tickets = CoverPicker.Pick(game, count, rng);
+        var count = tickets.Count;
+        if (count == 0) return;
         var any = PortfolioOdds.AnyPrizeByPrefix(game, tickets);
         var three = game.TicketHasSpecial ? PortfolioOdds.AtLeastByPrefix(game, tickets, 3) : null;
 
         var p = game.Odds.AnyPrizeProbability;
-        sb.AppendLine($"### Bộ khuyến nghị — phủ số ({count} vé)");
+        sb.AppendLine($"### Phương án phủ số ({count} vé)");
         sb.AppendLine();
-        sb.AppendLine("Các vé không trùng số nhau" + (game.TicketHasSpecial ? " và có số ĐB khác nhau" : "") +
-                      " nên ít khi cùng trượt — cách chọn duy nhất có lợi thế đo được.");
+        sb.AppendLine("Các vé giảm trùng số và phân bố số ĐB nếu có. Xác suất dưới đây được tính chính xác cho nhóm này " +
+                      "theo mô hình quay đều, độc lập; chưa có chứng minh đây là nhóm tối ưu.");
+        sb.AppendLine($"Chi phí {count} vé: **{Ui.Money(checked((long)(count * TicketEconomics.TicketPrice)))}**. Trúng giải bất kỳ không đồng nghĩa hòa vốn hoặc có lời.");
         sb.AppendLine();
         // ví dụ theo thói quen mua 5 vé mỗi kỳ
         var example = Math.Min(5, count);
@@ -197,14 +265,14 @@ internal static class ReportCommand
                       $"**từ vé 1 đến vé ở dòng đó**. Ví dụ mua {example} vé → mua {exampleRange} → xem dòng cover {example}: " +
                       $"**{Percent(exampleAny)}**" +
                       (1 / exampleAny >= 2 ? $", tức khoảng 1 trong {Math.Round(1 / exampleAny).ToString("N0", Ui.Vi)} kỳ có vé trúng" : "") +
-                      $" ({example} vé chọn ngẫu nhiên: {Percent(PortfolioOdds.IndependentAnyPrize(game, example))}). " +
+                      $" ({example} vé ngẫu nhiên khác nhau: {Percent(PortfolioOdds.UniformDistinctAnyPrize(game, example))}). " +
                       $"Đó không phải khả năng của riêng vé ở dòng đó: mỗi vé riêng lẻ vẫn chỉ trúng {Percent(p)}.");
         sb.AppendLine();
         sb.Append("| Vé | Bộ số |");
         if (game.TicketHasSpecial) sb.Append(" ĐB |");
         sb.Append(" Mua từ vé 1 đến vé này: có ≥1 vé trúng |");
         if (three is not null) sb.Append(" …có ≥1 vé trùng ≥3 số |");
-        sb.AppendLine(" Cùng số vé chọn ngẫu nhiên |");
+        sb.AppendLine(" Cùng số vé ngẫu nhiên khác nhau |");
         sb.Append("|---|---|");
         if (game.TicketHasSpecial) sb.Append("---|");
         sb.Append("---:|");
@@ -217,32 +285,46 @@ internal static class ReportCommand
             if (game.TicketHasSpecial) sb.Append($" `{Ui.Ball(t.Special!.Value)}` |");
             sb.Append($" **{Percent(any[k - 1])}** |");
             if (three is not null) sb.Append($" {Percent(three[k - 1])} |");
-            sb.AppendLine($" {Percent(PortfolioOdds.IndependentAnyPrize(game, k))} |");
+            sb.AppendLine($" {Percent(PortfolioOdds.UniformDistinctAnyPrize(game, k))} |");
         }
         sb.AppendLine();
 
-        var n = suggested.Count;
-        if (n > 0)
-        {
-            var suggestedAny = PortfolioOdds.AnyPrizeByPrefix(game, suggested)[^1];
-            sb.AppendLine($"- Cùng {n} vé: {n} bộ theo thống kê ở bảng dưới → {Percent(suggestedAny)}; " +
-                          $"{n} vé chọn ngẫu nhiên → {Percent(PortfolioOdds.IndependentAnyPrize(game, n))}" +
-                          (n <= tickets.Count ? $"; {n} vé phủ số → **{Percent(any[n - 1])}**." : "."));
-        }
-        if (groups.FirstOrDefault(g => g.Strategy == CoverPicker.Name) is { } real)
-        {
-            var others = string.Join(", ", groups.Where(g => g.Strategy != CoverPicker.Name)
-                .Select(g => $"{g.Strategy} {Percent(g.AnyWinRate)}"));
-            sb.AppendLine($"- Kiểm chứng trên {real.TestDraws} kỳ đã quay: mỗi kỳ mua {real.GroupSize} vé phủ số → " +
-                          $"**{Percent(real.AnyWinRate)}** số kỳ có vé trúng; {real.GroupSize} vé theo {others}.");
-        }
         sb.AppendLine("- " + GameCoverNote(game, example));
         var top = game.Odds.Table[0];
         sb.AppendLine($"- {top.Prize} ({top.Condition}): {count} vé khác nhau có khả năng đúng bằng {count} lần một vé — " +
                       $"khoảng 1 trên {(1 / (count * top.Probability)).ToString("N0", Ui.Vi)}, chọn số kiểu gì cũng vậy.");
-        sb.AppendLine("- Tiền thưởng trung bình không đổi theo cách chọn số; phủ số chỉ làm giảm số kỳ cả nhóm vé cùng trắng tay.");
+        sb.AppendLine("- Phủ số thay đổi xác suất cả nhóm có giải; không làm tăng xác suất của từng vé hoặc bảo đảm lợi nhuận.");
         sb.AppendLine();
-        return any[^1];
+    }
+
+    /// <summary>
+    /// Tóm tắt backtest nhóm vé bằng lời thường (chi tiết và độ tin cậy nằm trong mục Backtest):
+    /// mua N vé mỗi kỳ trên các kỳ đã quay thì bao nhiêu kỳ có vé trúng, và tiền thu về so với tiền vé.
+    /// </summary>
+    private static void WriteGroupSummary(StringBuilder sb, IReadOnlyList<GroupBacktestResult> groups)
+    {
+        if (groups.FirstOrDefault(g => g.Strategy == CoverPicker.Name) is not { TestDraws: > 0 } cover
+            || groups.FirstOrDefault(g => g.Strategy == "random") is not { } random) return;
+
+        static string Money(double value) => Ui.Money((long)Math.Round(value));
+        string Line(GroupBacktestResult g) =>
+            $"{g.Strategy} → {Percent(g.AnyWinRate)}" +
+            (g.AnyWinRate > 0 && 1 / g.AnyWinRate >= 2 ? $" (khoảng 1 trong {Math.Round(1 / g.AnyWinRate).ToString("N0", Ui.Vi)} kỳ)" : "");
+
+        var n = cover.GroupSize;
+        sb.AppendLine($"**Thử lại trên lịch sử:** nếu {cover.TestDraws.ToString("N0", Ui.Vi)} kỳ đã quay " +
+                      $"(#{cover.DrawIds[0]:D5} → #{cover.DrawIds[^1]:D5}) mỗi kỳ bạn mua {n} vé, số kỳ có ít nhất 1 vé trúng là:");
+        sb.AppendLine();
+        sb.AppendLine($"- **{Line(cover)}**");
+        sb.AppendLine($"- {Line(random)}");
+        foreach (var g in groups.Where(g => g.Strategy is not CoverPicker.Name and not "random"))
+            sb.AppendLine($"- {Line(g)}");
+        sb.AppendLine();
+        sb.AppendLine($"Tiền: mỗi kỳ chi {Money(cover.StakePerGroup)}, thu về trung bình {Money(cover.AverageBasePayout)} với phủ số " +
+                      $"và {Money(random.AverageBasePayout)} với vé ngẫu nhiên (chỉ tính giải cố định, chưa trừ thuế, không tính Jackpot). " +
+                      "Về lâu dài mọi cách chọn thu về như nhau — chênh lệch tiền ở đây là may rủi. " +
+                      "Phủ số chỉ thay đổi **số kỳ có vé trúng**, không làm tăng tiền thưởng.");
+        sb.AppendLine();
     }
 
     /// <summary>Vì sao phủ số giúp nhiều hay ít ở từng game.</summary>
@@ -256,92 +338,36 @@ internal static class ReportCommand
             SpecialKind.SeparatePool =>
                 $"Với {game.Name}: giải {common.Prize} ({common.Condition}) chiếm {share} số lần trúng và chỉ cần trùng số ĐB " +
                 $"(01–{game.SpecialMax:D2}), nên số ĐB khác nhau là lợi thế chính: {example} vé phủ {example}/{game.SpecialMax} " +
-                $"khả năng của số ĐB; {game.SpecialMax} vé có đủ {game.SpecialMax} số ĐB thì kỳ nào cũng có vé trúng.",
+                $"khả năng của số ĐB; {game.SpecialMax} vé có đủ {game.SpecialMax} số ĐB thì kỳ nào cũng có vé trúng, nhưng vẫn có thể lỗ tiền.",
             SpecialKind.BonusFromMainPool =>
                 $"Với {game.Name}: số ĐB là quả thứ 7 quay cùng lồng, chỉ dùng cho giải 5 số + ĐB, nên không có giải nào chỉ cần " +
-                $"trùng ĐB; {share} số lần trúng là {common.Prize} ({common.Condition}). Phủ số vì vậy chỉ hơn chọn ngẫu nhiên " +
-                "một chút; khác biệt rõ hơn khi so với hot/cold (cả nhóm vé lấy từ cùng một nhóm số nên hay cùng trượt).",
+                $"trùng ĐB; {share} xác suất trúng giải của một vé thuộc {common.Prize} ({common.Condition}). So sánh lợi ích của nhóm bằng các tỷ lệ ở bảng trên.",
             _ =>
                 $"Với {game.Name}: vé không có số ĐB và {share} số lần trúng là {common.Prize} ({common.Condition}). " +
-                "Phủ số vì vậy chỉ hơn chọn ngẫu nhiên một chút; khác biệt rõ hơn khi so với hot/cold " +
-                "(cả nhóm vé lấy từ cùng một nhóm số nên hay cùng trượt).",
+                "So sánh lợi ích của nhóm bằng các tỷ lệ ở bảng trên.",
         };
     }
 
     /// <summary>Mua nhóm <paramref name="groupSize"/> vé mỗi kỳ trên lịch sử thật: phủ số trước, random cuối.</summary>
     private static IReadOnlyList<GroupBacktestResult> RunGroupBacktests(
-        Game game, IReadOnlyList<Draw> draws, int groupSize, int runs, int train, int seed)
+        Game game, IReadOnlyList<Draw> draws, int groupSize, int runs, int train, int seed, int? testFromDrawId)
     {
-        // cùng số vé mỗi kỳ như backtest từng vé (runs), chia thành các nhóm groupSize vé
         var groups = Math.Max(1, runs / groupSize);
-        var strategies = StrategyCatalog.All().OrderBy(s => s.Name == "random" ? 1 : 0).ToList();
-        return [Backtester.RunCover(game, draws, groupSize, train, groups, seed),
-                .. strategies.Select(s => Backtester.RunGroups(game, draws, s, groupSize, train, groups, seed))];
+        return [Backtester.RunCover(game, draws, groupSize, train, groups, seed, testFromDrawId),
+            .. StrategyCatalog.All().Select(s => Backtester.RunGroups(game, draws, s, groupSize, train, groups, seed, testFromDrawId))];
     }
 
     private static void WriteBacktest(
         StringBuilder sb, Game game, IReadOnlyList<Draw> draws, int seed, int runs, int train,
-        IReadOnlyList<GroupBacktestResult> groups, double? coverExact)
+        IReadOnlyList<GroupBacktestResult> groups, int? testFromDrawId, int gameCount)
     {
-        if (draws.Count <= train)
-        {
-            sb.AppendLine($"_Backtest: cần hơn {train} kỳ (có {draws.Count})._");
-            sb.AppendLine();
-            return;
-        }
-        var results = StrategyCatalog.All().Select(s => Backtester.Run(game, draws, s, train, runs, seed)).ToList();
-        var baseline = results.Single(r => r.Strategy == "random");
-        var comparisons = results.Where(r => r.Strategy != "random")
-            .Select(r => Backtester.Compare(r, baseline)).ToDictionary(c => c.Strategy);
-        var correctedAlpha = comparisons.Count == 0 ? 0.05 : 0.05 / comparisons.Count;
-
-        sb.AppendLine("<details><summary>Backtest walk-forward " +
-                      $"({baseline.TestDraws} kỳ, {runs} lần/kỳ)</summary>");
+        var results = StrategyCatalog.All().Select(s => Backtester.Run(game, draws, s, train, runs, seed, testFromDrawId)).ToList();
+        sb.AppendLine("<details><summary>Backtest walk-forward</summary>");
         sb.AppendLine();
-        sb.AppendLine("| Chiến lược | Số trùng TB/kỳ | so với Random | p ghép cặp | Trúng giải |");
-        sb.AppendLine("|---|---:|---:|---:|---:|");
-        foreach (var r in results)
-            sb.AppendLine($"| {r.Strategy} | {r.AverageMatches.ToString("F3", Inv)} | " +
-                          $"{(r.Strategy == "random" ? "-" : (r.AverageMatches - baseline.AverageMatches).ToString("+0.000;-0.000;0.000", Inv))} | " +
-                          $"{(r.Strategy == "random" ? "-" : comparisons[r.Strategy].PValue.ToString("F3", Inv))} | " +
-                          $"{r.AnyPrizeRate.ToString("P2", Inv)} |");
-        sb.AppendLine($"| _lý thuyết_ | {game.Odds.ExpectedMatches.ToString("F3", Inv)} | | | {game.Odds.AnyPrizeProbability.ToString("P2", Inv)} |");
-        sb.AppendLine();
-        var better = comparisons.Values.Where(c => c.MeanDifference > 0 && c.PValue < correctedAlpha).ToList();
-        sb.AppendLine($"p dùng chênh lệch ghép cặp theo từng kỳ; ngưỡng Bonferroni 5%: p < {correctedAlpha.ToString("F4", Inv)}. " +
-                      (better.Count == 0
-                          ? "**Không phát hiện chiến lược nào tốt hơn Random ở ngưỡng đã hiệu chỉnh**; " +
-                            (baseline.TestDraws < 500
-                                ? "mẫu nhỏ nên kết quả chỉ mang tính thăm dò."
-                                : $"trên {baseline.TestDraws} kỳ, chênh lệch so với Random đều rất nhỏ và không có ý nghĩa thống kê.")
-                          : $"Có bằng chứng thăm dò rằng **{string.Join(", ", better.Select(c => c.Strategy))}** tốt hơn Random trên mẫu này; cần kiểm chứng bằng dữ liệu mới."));
-        sb.AppendLine();
-        if (groups.Count > 0)
-        {
-            var size = groups[0].GroupSize;
-            sb.AppendLine($"**Mua {size} vé mỗi kỳ** trên {groups[0].TestDraws} kỳ thật ({groups[0].Groups} lần/kỳ):");
-            sb.AppendLine();
-            sb.AppendLine($"| Cách chọn {size} vé | Kỳ có ≥1 vé trúng | Lý thuyết | Vé trúng TB/kỳ |");
-            sb.AppendLine("|---|---:|---:|---:|");
-            foreach (var g in groups)
-            {
-                var theory = g.Strategy switch
-                {
-                    CoverPicker.Name when coverExact is { } c => Percent(c),
-                    "random" => Percent(PortfolioOdds.IndependentAnyPrize(game, size)),
-                    _ => "",
-                };
-                sb.AppendLine($"| {g.Strategy} | {Percent(g.AnyWinRate)} | {theory} | {g.AverageWinningTickets.ToString("F3", Inv)} |");
-            }
-            sb.AppendLine();
-            sb.AppendLine($"Vé trúng TB/kỳ như nhau với mọi cách chọn (lý thuyết {size} × {Percent(game.Odds.AnyPrizeProbability)} = " +
-                          $"{(size * game.Odds.AnyPrizeProbability).ToString("F3", Inv)}); chỉ tỉ lệ kỳ có vé trúng là thay đổi.");
-            sb.AppendLine();
-        }
+        BacktestTables.WriteMarkdown(sb, results, groups, gameCount);
         sb.AppendLine("</details>");
         sb.AppendLine();
     }
-
     private static void WriteOdds(StringBuilder sb, Game game)
     {
         sb.AppendLine("<details><summary>Xác suất thật mỗi vé</summary>");
@@ -400,8 +426,16 @@ internal static class ReportCommand
     /// <summary>Đối chiếu các bộ đã gợi ý ở báo cáo trước với kết quả thật.</summary>
     private static void WriteReview(StringBuilder sb, Game game, IReadOnlyList<PredictionReview> reviews)
     {
-        var mine = reviews.Where(r => r.Set.Game == game).ToList();
-        if (mine.Count == 0) return;
+        var mine = reviews.Where(r => r.Set.Game == game && r.Set.GeneratedAt < r.Set.TargetDrawAt)
+            .GroupBy(r => r.Draw.DrawId).Select(g => g.OrderBy(r => r.Set.GeneratedAt).First())
+            .OrderBy(r => r.Draw.DrawId).ToList();
+        if (mine.Count == 0)
+        {
+            sb.AppendLine("_Kiểm tra gợi ý cũ: chưa có dự đoán đã lưu nào có kết quả. Mục này hiện ra sau khi kỳ mục tiêu " +
+                          "của một dự đoán đã lưu (thư mục `predictions/ledger/`) được quay._");
+            sb.AppendLine();
+            return;
+        }
 
         var last = mine[^1];
         var d = last.Draw;
@@ -451,7 +485,7 @@ internal static class ReportCommand
             sb.AppendLine();
         }
         sb.AppendLine();
-        sb.AppendLine("Chênh lệch giữa các chiến lược trên vài chục vé là dao động ngẫu nhiên bình thường; cần hàng trăm kỳ mới đánh giá được.");
+        sb.AppendLine("Chỉ tính bản đầu tiên mỗi kỳ đã lưu trước giờ quay và khớp lịch sử đầu vào. Thời gian trong file không thay thế bằng chứng công bố độc lập; có thể đối chiếu commit trước giờ quay. Chưa thể suy ra lợi thế dự đoán từ chênh lệch nhỏ trên ít kỳ.");
         sb.AppendLine();
         sb.AppendLine("</details>");
         sb.AppendLine();

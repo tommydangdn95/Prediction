@@ -44,12 +44,22 @@ public class StatisticsTests
     }
 
     [Fact]
-    public void ChiSquare_matches_spec()
+    public void ChiSquare_corrects_the_old_spec_for_sampling_without_replacement()
     {
         var chi = DrawStatistics.ChiSquareUniform(P, Seed);
-        chi.ChiSquare.Should().BeApproximately(48.3, 0.05);
+        chi.ChiSquare.Should().BeApproximately(53.21938775510204, 1e-10);
         chi.DegreesOfFreedom.Should().Be(54);
-        chi.PValue.Should().BeApproximately(0.69, 0.01);
+        // Independent gamma survival evaluation for 54 degrees of freedom.
+        chi.PValue.Should().BeApproximately(0.504466446413938, 1e-10);
+    }
+
+    [Fact]
+    public void Corrected_statistic_has_the_expected_null_mean_for_lotto_draws()
+    {
+        var mean = Enumerable.Range(0, 1000)
+            .Average(seed => DrawStatistics.ChiSquareUniform(Games.Lotto535, Synthetic(Games.Lotto535, 40, seed)).ChiSquare);
+        // df=34; the uncorrected Pearson statistic incorrectly has mean N-k=30.
+        mean.Should().BeApproximately(34, 1.2);
     }
 
     [Fact]

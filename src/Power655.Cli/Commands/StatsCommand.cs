@@ -102,8 +102,9 @@ internal static class StatsCommand
         AnsiConsole.Write(new Columns(dist, summary));
 
         AnsiConsole.MarkupLine(chi.PValue >= 0.05
-            ? $"p = {chi.PValue:F2} ≥ 0.05: [green]không có bằng chứng[/] tần suất lệch khỏi ngẫu nhiên đều — chênh lệch nóng/lạnh là dao động bình thường."
-            : $"p = {chi.PValue:F3} < 0.05: tần suất lệch khỏi đều ở mức có ý nghĩa với mẫu này (cần thêm dữ liệu để kết luận).");
+            ? $"p = {chi.PValue:F3} ≥ 0.05: chưa bác bỏ giả thuyết tần suất đều."
+            : $"p = {chi.PValue:F3} < 0.05: có dấu hiệu lệch tần suất ở ngưỡng chưa hiệu chỉnh nhiều phép thử.");
+        AnsiConsole.WriteLine("χ² đã hiệu chỉnh rút không hoàn lại; p là xấp xỉ, cần thận trọng khi ít kỳ. Kiểm định tần suất không chứng minh độc lập hoặc khả năng dự đoán.");
         Ui.WriteDisclaimer();
     }
 

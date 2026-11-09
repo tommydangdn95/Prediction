@@ -107,7 +107,12 @@ public static class DrawStatistics
         if (list.Count == 0) throw new ArgumentException("Cần ít nhất 1 kỳ.", nameof(draws));
 
         var expected = (double)list.Count * game.PickCount / game.MaxNumber;
-        var chi = Frequency(game, list).Values.Sum(o => (o - expected) * (o - expected) / expected);
+        // Trong một kỳ, k bóng được rút KHÔNG hoàn lại: phương sai của tần suất
+        // nhỏ hơn mô hình multinomial theo hệ số (N-k)/(N-1).
+        // Genest, Lockhart & Stephens (2002), chi-square and the lottery, p.244:
+        // https://www.sfu.ca/~lockhart/Research/Papers/GenestLockhartStephensJRSSD02.pdf
+        var raw = Frequency(game, list).Values.Sum(o => (o - expected) * (o - expected) / expected);
+        var chi = raw * (game.MaxNumber - 1.0) / (game.MaxNumber - game.PickCount);
         var df = game.MaxNumber - 1;
         var p = 1 - ChiSquared.CDF(df, chi);
         return new ChiSquareResult(chi, df, p, expected);

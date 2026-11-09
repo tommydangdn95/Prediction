@@ -7,6 +7,12 @@ Mỗi lần chạy: nạp `data/history.csv` → `fetch` kết quả mới cả 
 tạo `predictions/YYYY-MM-DD.md` + `predictions/LATEST.md` → commit vào `main`. Báo cáo cũng hiện ở
 trang Summary của lần chạy.
 
+`report` còn lưu `predictions/ledger/{game}-{targetDrawId}.json`: bản đầu tiên của mỗi kỳ không bị ghi đè,
+gồm thời điểm tạo, kỳ mục tiêu, bộ vé và dấu vết đầu vào. Markdown cùng ngày có thể được tạo lại để hiển thị,
+nhưng hai ca Lotto và dự đoán sáng vẫn còn trong ledger. Mega/Power không đếm nhiều ngày dự đoán cùng kỳ thành nhiều kỳ độc lập.
+Nếu thiếu kết quả mới hoặc kỳ mục tiêu đã bắt đầu, báo cáo đánh dấu game đó và không tạo dự đoán mới;
+workflow vẫn commit phần dữ liệu/dự đoán hợp lệ. Commit trước giờ quay là dấu vết công bố để đối chiếu với timestamp tại máy.
+
 ## 1. Tạo token GitHub (fine-grained)
 
 GitHub → Settings → Developer settings → Personal access tokens → **Fine-grained tokens** → Generate new token:

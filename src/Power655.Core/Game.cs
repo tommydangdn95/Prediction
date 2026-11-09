@@ -101,7 +101,7 @@ public static class Games
 {
     public static Game Power655 { get; } = new(
         "655", "Power 6/55", 6, 55, SpecialKind.BonusFromMainPool, 55,
-        new DrawSchedule([DayOfWeek.Tuesday, DayOfWeek.Thursday, DayOfWeek.Saturday], [new TimeOnly(18, 45)]),
+        new DrawSchedule([DayOfWeek.Tuesday, DayOfWeek.Thursday, DayOfWeek.Saturday], [new TimeOnly(18, 45)], [new TimeOnly(18, 0)]),
         [
             new("Jackpot 1", "6 số", 6),
             new("Jackpot 2", "5 số + ĐB", 5, true),
@@ -112,7 +112,7 @@ public static class Games
 
     public static Game Mega645 { get; } = new(
         "645", "Mega 6/45", 6, 45, SpecialKind.None, 0,
-        new DrawSchedule([DayOfWeek.Wednesday, DayOfWeek.Friday, DayOfWeek.Sunday], [new TimeOnly(18, 45)]),
+        new DrawSchedule([DayOfWeek.Wednesday, DayOfWeek.Friday, DayOfWeek.Sunday], [new TimeOnly(18, 45)], [new TimeOnly(18, 0)]),
         [
             new("Jackpot", "6 số", 6),
             new("Giải Nhất", "5 số", 5),
@@ -126,7 +126,7 @@ public static class Games
     /// </summary>
     public static Game Lotto535 { get; } = new(
         "535", "Lotto 5/35", 5, 35, SpecialKind.SeparatePool, 12,
-        new DrawSchedule(Enum.GetValues<DayOfWeek>(), [new TimeOnly(13, 45), new TimeOnly(21, 45)]),
+        new DrawSchedule(Enum.GetValues<DayOfWeek>(), [new TimeOnly(13, 45), new TimeOnly(21, 45)], [new TimeOnly(13, 0), new TimeOnly(21, 0)]),
         [
             new("Độc đắc", "5 số + ĐB", 5, true),
             new("Giải Nhất", "5 số", 5, false),

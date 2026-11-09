@@ -115,7 +115,7 @@ public interface IDrawSource
 Kiểm tra với seed 40 kỳ (Phụ lục A):
 - `Frequency[18] == 11`, `Frequency[7] == 9`
 - `Gap[15] == 29`
-- `ChiSquareUniform` → chi² ≈ 48.3, p ≈ 0.69
+- `ChiSquareUniform` → chi² ≈ 53.2194, p ≈ 0.5045 (df=54). Hiệu chỉnh thống kê Pearson thô bằng 54/49 vì rút 6/55 không hoàn lại; giá trị cũ 48.3 / 0.69 chưa có hiệu chỉnh.
 
 ---
 

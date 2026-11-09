@@ -1,14 +1,14 @@
 namespace Power655.Core.Strategies;
 
 /// <summary>
-/// "Phủ số": sinh cả nhóm vé cùng lúc sao cho các vé ít trùng số nhau nhất —
-/// vòng đầu rời nhau hoàn toàn (5/35: 7 vé phủ đủ 35 số; 6/45: 7 vé; 6/55: 9 vé), các vé sau mỗi vé trùng
-/// với mỗi vé trước tối đa ~1 số — và số ĐB (Lotto 5/35) khác nhau.
+/// "Phủ số": sinh cả nhóm vé khác nhau, ưu tiên giảm trùng số —
+/// vòng đầu rời nhau hoàn toàn (5/35: 7 vé phủ đủ 35 số; 6/45: 7 vé; 6/55: 9 vé), sau đó ưu tiên
+/// số ít dùng và cặp số ít đi chung; số ĐB Lotto 5/35 được dùng lần lượt theo chu kỳ 12 số.
 /// <para>
-/// Xác suất trúng của TỪNG vé không đổi (mọi vé như nhau). Cái tăng lên là P(ít nhất một vé trong nhóm trúng)
-/// so với cùng số vé chọn ngẫu nhiên/theo hot-cold (các vé đó hay trùng số nhau nên trúng/trượt cùng lúc).
-/// Số vé trúng kỳ vọng và tiền thưởng kỳ vọng không đổi. Không dùng lịch sử.
-/// Vé được sắp sao cho mua k vé đầu tiên cũng là nhóm phủ tốt cho k vé.
+/// Xác suất trúng của TỪNG vé không đổi (mọi vé như nhau). P(ít nhất một vé trong nhóm trúng)
+/// có thể cao hơn nhóm vé tập trung vào ít số. Xác suất của nhóm cụ thể được tính bằng PortfolioOdds.
+/// Đây là thuật toán tham lam, không bảo đảm nhóm tối ưu toàn cục. Không dùng lịch sử.
+/// Số vé trúng kỳ vọng không đổi; trúng giải không đồng nghĩa với có lãi.
 /// </para>
 /// </summary>
 public static class CoverPicker
@@ -19,7 +19,7 @@ public static class CoverPicker
     {
         ArgumentNullException.ThrowIfNull(game);
         ArgumentNullException.ThrowIfNull(rng);
-        ArgumentOutOfRangeException.ThrowIfNegative(count);
+        TicketGroups.ValidateCount(game, count);
 
         var max = game.MaxNumber;
         var usage = new int[max + 1];
@@ -28,8 +28,10 @@ public static class CoverPicker
         var order = new int[max];
         var specials = new Queue<int>();
         var tickets = new List<Ticket>(count);
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        var limit = TicketGroups.AttemptLimit(count);
 
-        for (var t = 0; t < count; t++)
+        for (long attempt = 0; tickets.Count < count && attempt < limit; attempt++)
         {
             var chosen = new List<int>(game.PickCount);
             while (chosen.Count < game.PickCount)
@@ -50,14 +52,6 @@ public static class CoverPicker
                 inTicket[best] = true;
             }
 
-            foreach (var x in chosen)
-            {
-                usage[x]++;
-                inTicket[x] = false;
-                foreach (var y in chosen)
-                    if (x != y) together[x, y]++;
-            }
-
             int? special = null;
             if (game.TicketHasSpecial)
             {
@@ -68,10 +62,21 @@ public static class CoverPicker
                     ShuffleInPlace(deck, rng);
                     foreach (var s in deck) specials.Enqueue(s);
                 }
-                special = specials.Dequeue();
+                special = specials.Peek();
             }
-            tickets.Add(new Ticket(chosen.Order().ToArray(), special));
+            var ticket = new Ticket(chosen.Order().ToArray(), special);
+            foreach (var x in chosen) inTicket[x] = false;
+            if (!seen.Add(TicketGroups.Key(game, ticket))) continue;
+            foreach (var x in chosen)
+            {
+                usage[x]++;
+                foreach (var y in chosen)
+                    if (x != y) together[x, y]++;
+            }
+            if (game.TicketHasSpecial) specials.Dequeue();
+            tickets.Add(ticket);
         }
+        if (tickets.Count != count) throw TicketGroups.GenerationFailed(count, tickets.Count);
         return tickets;
     }
 
