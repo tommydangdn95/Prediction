@@ -3,19 +3,118 @@
 > **Mỗi kỳ quay là độc lập. Thống kê quá khứ không làm tăng xác suất trúng.**
 > Mọi bộ số — kể cả bộ ngẫu nhiên — có cùng xác suất trúng. Bộ gợi ý chỉ phản ánh đặc điểm dữ liệu quá khứ.
 
-Tạo báo cáo lúc 14:31 10/11/2026 (giờ VN). Mỗi cách chọn là một phương án mua riêng.
+Tạo báo cáo lúc 15:00 10/11/2026 (giờ VN). Mỗi cách chọn là một phương án mua riêng.
 
 ## Lotto 5/35
 
-- Kỳ mới nhất: **#00997** 09/11/2026 — `04 16 26 27 29 | 06`
-- Lịch sử dùng để gợi ý: 997 kỳ (#00001 → #00997)
-- Tỉ lệ một số bất kỳ có mặt trong kết quả: kỳ vọng 14,29 % số kỳ; thực tế từ 11,74 % (số 12) đến 16,75 % (số 34).
-- Kiểm định tần suất χ² đã hiệu chỉnh rút không hoàn lại trên 997 kỳ: p = 0.0182 → có dấu hiệu lệch tần suất ở ngưỡng 5% chưa hiệu chỉnh nhiều phép thử.
+- Kỳ mới nhất: **#00999** 10/11/2026 — `01 05 18 26 33 | 07`
+- Lịch sử dùng để gợi ý: 999 kỳ (#00001 → #00999)
+- Tỉ lệ một số bất kỳ có mặt trong kết quả: kỳ vọng 14,29 % số kỳ; thực tế từ 11,71 % (số 12) đến 16,72 % (số 22).
+- Kiểm định tần suất χ² đã hiệu chỉnh rút không hoàn lại trên 999 kỳ: p = 0.0181 → có dấu hiệu lệch tần suất ở ngưỡng 5% chưa hiệu chỉnh nhiều phép thử.
   Đây là kiểm định tần suất riêng lẻ, không chứng minh tính độc lập hay khả năng dự đoán. p là xấp xỉ; cần thận trọng khi ít dữ liệu và khi thử nhiều game/nhiều lần.
 
 _Kiểm tra gợi ý cũ: chưa có dự đoán đã lưu nào có kết quả. Mục này hiện ra sau khi kỳ mục tiêu của một dự đoán đã lưu (thư mục `predictions/ledger/`) được quay._
 
-**Chưa tạo dự đoán mới:** Kỳ ngay sau dữ liệu mới nhất đã bắt đầu; cần cập nhật kết quả trước khi tạo dự đoán mới.
+- Kỳ mục tiêu: **#01000**, bắt đầu 21:00 10/11/2026 (giờ VN).
+- Bộ số tạo lúc 15:00:35 10/11/2026 · seed `20261110` · `sets=2;cover=8;unique-v2`. Chạy lại cùng kỳ giữ nguyên bộ đã lưu.
+
+### Phương án phủ số (8 vé)
+
+Các vé giảm trùng số và phân bố số ĐB nếu có. Xác suất dưới đây được tính chính xác cho nhóm này theo mô hình quay đều, độc lập; chưa có chứng minh đây là nhóm tối ưu.
+Chi phí 8 vé: **80.000đ**. Trúng giải bất kỳ không đồng nghĩa hòa vốn hoặc có lời.
+
+**Cách đọc cột %:** số ở mỗi dòng là khả năng có **ít nhất 1 vé trúng giải** nếu bạn mua **từ vé 1 đến vé ở dòng đó**. Ví dụ mua 5 vé → mua cover 1–5 → xem dòng cover 5: **45,71 %**, tức khoảng 1 trong 2 kỳ có vé trúng (5 vé ngẫu nhiên khác nhau: 39,64 %). Đó không phải khả năng của riêng vé ở dòng đó: mỗi vé riêng lẻ vẫn chỉ trúng 9,60 %.
+
+| Vé | Bộ số | ĐB | Mua từ vé 1 đến vé này: có ≥1 vé trúng | …có ≥1 vé trùng ≥3 số | Cùng số vé ngẫu nhiên khác nhau |
+|---|---|---|---:|---:|---:|
+| cover 1 | `01 14 23 24 26` | `01` | **9,60 %** | 1,39 % | 9,60 % |
+| cover 2 | `02 09 10 22 32` | `12` | **18,98 %** | 2,77 % | 18,29 % |
+| cover 3 | `04 06 07 13 20` | `10` | **28,12 %** | 4,16 % | 26,13 % |
+| cover 4 | `12 18 21 25 35` | `07` | **37,03 %** | 5,55 % | 33,23 % |
+| cover 5 | `03 08 15 19 29` | `05` | **45,71 %** | 6,93 % | 39,64 % |
+| cover 6 | `05 17 30 33 34` | `04` | **54,16 %** | 8,32 % | 45,44 % |
+| cover 7 | `11 16 27 28 31` | `03` | **62,38 %** | 9,71 % | 50,68 % |
+| cover 8 | `11 12 19 20 23` | `06` | **70,35 %** | 11,04 % | 55,42 % |
+
+- Với Lotto 5/35: giải Khuyến khích (0–2 số + ĐB) chiếm 86 % số lần trúng và chỉ cần trùng số ĐB (01–12), nên số ĐB khác nhau là lợi thế chính: 5 vé phủ 5/12 khả năng của số ĐB; 12 vé có đủ 12 số ĐB thì kỳ nào cũng có vé trúng, nhưng vẫn có thể lỗ tiền.
+- Độc đắc (5 số + ĐB): 8 vé khác nhau có khả năng đúng bằng 8 lần một vé — khoảng 1 trên 486.948, chọn số kiểu gì cũng vậy.
+- Phủ số thay đổi xác suất cả nhóm có giải; không làm tăng xác suất của từng vé hoặc bảo đảm lợi nhuận.
+
+**Thử lại trên lịch sử:** nếu 979 kỳ đã quay (#00021 → #00999) mỗi kỳ bạn mua 8 vé, số kỳ có ít nhất 1 vé trúng là:
+
+- **cover → 70,28 % (khoảng 7 trong 10 kỳ)**
+- random → 55,30 % (khoảng 6 trong 10 kỳ)
+- hot → 34,47 % (khoảng 1 trong 3 kỳ)
+- cold → 36,36 % (khoảng 1 trong 3 kỳ)
+- balanced → 55,54 % (khoảng 6 trong 10 kỳ)
+
+Tiền: mỗi kỳ chi 80.000đ, thu về trung bình 13.607đ với phủ số và 14.380đ với vé ngẫu nhiên (chỉ tính giải cố định, chưa trừ thuế, không tính Jackpot). Về lâu dài mọi cách chọn thu về như nhau — chênh lệch tiền ở đây là may rủi. Phủ số chỉ thay đổi **số kỳ có vé trúng**, không làm tăng tiền thưởng.
+
+### Bộ theo thống kê (tham khảo)
+
+Chọn theo tần suất (hot), số gan (cold), cân bằng chẵn/lẻ–nhỏ/lớn (balanced). Các quy tắc này chưa chứng minh dự đoán kỳ sau tốt hơn ngẫu nhiên. Mỗi nhóm được loại vé trùng hoàn toàn.
+
+| Chiến lược | Bộ số | ĐB | Chẵn/Lẻ | Nhỏ/Lớn (≤17) | Tổng |
+|---|---|---|---|---|---:|
+| hot | `01 25 29 33 35` | `05` | 0/5 | 1/4 | 123 |
+| hot | `10 20 22 26 29` | `01` | 4/1 | 1/4 | 107 |
+| cold | `03 08 10 14 28` | `12` | 4/1 | 4/1 | 63 |
+| cold | `07 08 19 24 32` | `03` | 3/2 | 2/3 | 90 |
+| balanced | `01 02 26 33 34` | `05` | 3/2 | 2/3 | 96 |
+| balanced | `06 12 16 21 25` | `04` | 3/2 | 3/2 | 80 |
+| random (đối chứng) | `12 15 22 29 35` | `09` | 2/3 | 2/3 | 113 |
+| random (đối chứng) | `03 07 09 27 30` | `10` | 1/4 | 3/2 | 76 |
+
+**Khả năng của mỗi bộ ở kỳ tới** (giống nhau cho mọi bộ, kể cả random): trúng giải bất kỳ **9,60 %** · trúng ≥3 số **1,39 %** · Độc đắc **0,0000257 %** (1 / 3.895.584).
+
+| Trùng số chính | 0 | 1 | 2 | 3 | 4 | 5 |
+|---|---:|---:|---:|---:|---:|---:|
+| Xác suất | 43,90 % | 42,21 % | 12,51 % | 1,34 % | 0,0462 % | 0,000308 % |
+
+Số ĐB trùng: 8,33 % (độc lập với số chính).
+
+<details><summary>Backtest walk-forward</summary>
+
+**Từng vé: 979 kỳ thật, 300 lần lấy mẫu/kỳ**
+
+| Chiến lược | Số chính trùng TB | Trúng giải | Δ với random (điểm %) | CI 95% của Δ (điểm %) | p trúng giải |
+|---|---|---|---|---|---|
+| random | 0.714 | 9,61 % | - | - | - |
+| hot | 0.710 | 9,06 % | -0.553 | -1.298 đến +0.192 | 0.1452 |
+| cold | 0.723 | 9,54 % | -0.071 | -0.818 đến +0.675 | 0.8516 |
+| balanced | 0.714 | 9,64 % | +0.026 | -0.119 đến +0.170 | 0.7282 |
+
+**Cùng 8 vé khác nhau/kỳ, 37 nhóm mô phỏng/kỳ**
+
+| Cách chọn | Có ≥1 giải | Khoảng 95% theo kỳ | Δ với random (điểm %) | CI 95% của Δ (điểm %) | p có ≥1 giải |
+|---|---|---|---|---|---|
+| cover | 70,28 % | 65,94 % đến 74,62 % | +14.982 | +14.303 đến +15.661 | 1.765E-229 |
+| random | 55,30 % | 50,96 % đến 59,64 % | - | - | - |
+| hot | 34,47 % | 30,13 % đến 38,81 % | -20.827 | -23.393 đến -18.260 | 5.906E-51 |
+| cold | 36,36 % | 32,02 % đến 40,70 % | -18.938 | -21.509 đến -16.367 | 4.638E-43 |
+| balanced | 55,54 % | 51,20 % đến 59,89 % | +0.248 | -0.427 đến +0.924 | 0.4705 |
+
+**Mô hình tiền giải cơ bản: chi 80.000đ/kỳ**
+
+| Cách chọn | Thưởng TB/kỳ | Lãi/lỗ TB/kỳ | ROI cơ bản | Thu ≥ chi | Thu > chi |
+|---|---|---|---|---|---|
+| cover | 13.607đ | -66.393đ | -82,99% | 1,35 % | 1,35 % |
+| random | 14.380đ | -65.620đ | -82,03% | 1,32 % | 1,28 % |
+| hot | 12.331đ | -67.669đ | -84,59% | 1,35 % | 1,28 % |
+| cold | 14.648đ | -65.352đ | -81,69% | 1,48 % | 1,39 % |
+| balanced | 14.614đ | -65.386đ | -81,73% | 1,28 % | 1,26 % |
+
+Đánh giá trúng giải theo từng kỳ thật; ngưỡng Bonferroni p < 0.00238 cho tối đa 21 so sánh trên các game được chọn. CI ghép cặp là xấp xỉ t 95% chưa hiệu chỉnh; khoảng của tỷ lệ nhóm dùng Hoeffding theo số kỳ. Dấu '-' là chưa đủ thông tin để ước lượng.
+
+Có chênh lệch tăng tỷ lệ trúng giải ở ngưỡng trên trong mẫu này; chưa chứng minh dự đoán tốt hơn hoặc có lợi nhuận ở kỳ mới.
+
+Các lần lặp chỉ giảm nhiễu mô phỏng, không làm tăng số kỳ độc lập. Chốt thuật toán, mục tiêu và mốc --from-draw trước khi thu thập dữ liệu mới; chọn lại mốc sau khi xem kết quả không tạo kiểm chứng ngoài mẫu.
+
+Giải cơ bản trước thuế; loại trừ Jackpot và phần chia thêm Lotto 5/35. Các cột tiền, ROI, thu ≥ chi và thu > chi chỉ thuộc mô hình này; không phải tiền thực nhận hay xác suất có lời đầy đủ. Không lấy toàn bộ quỹ Jackpot làm tiền thưởng cho một vé.
+
+Tổng chi của một chuỗi mua 8 vé qua 979 kỳ: 78.320.000đ. Mỗi cách chọn là phương án thay thế với cùng ngân sách; tiền thưởng và lãi/lỗ trong bảng là trung bình mỗi kỳ, không cộng tiền giữa các lần mô phỏng.
+
+</details>
 
 <details><summary>Xác suất thật mỗi vé</summary>
 
@@ -36,11 +135,11 @@ _Kiểm tra gợi ý cũ: chưa có dự đoán đã lưu nào có kết quả. 
 
 | Kỳ | Ngày | Kết quả | Jackpot 1 |
 |---|---|---|---:|
+| #00999 | 10/11/2026 | `01 05 18 26 33 | 07` | - |
+| #00998 | 09/11/2026 | `06 15 22 27 31 | 01` | - |
 | #00997 | 09/11/2026 | `04 16 26 27 29 | 06` | - |
 | #00996 | 08/11/2026 | `04 11 17 26 35 | 11` | - |
 | #00995 | 08/11/2026 | `02 13 16 18 22 | 05` | - |
-| #00994 | 07/11/2026 | `09 18 23 25 27 | 08` | - |
-| #00993 | 07/11/2026 | `06 10 23 25 33 | 05` | - |
 
 </details>
 
