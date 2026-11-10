@@ -1,0 +1,240 @@
+{
+  "SchemaVersion": 1,
+  "GameCode": "655",
+  "TargetDrawId": 1422,
+  "TargetDrawAt": "2026-11-10T18:00:00+07:00",
+  "GeneratedAt": "2026-11-10T00:36:03.4638751+00:00",
+  "LatestInputDrawId": 1421,
+  "LatestInputDrawAt": "2026-11-07T18:00:00+07:00",
+  "InputHash": "FAC7662484F204A027695DAC10F6A4CC785C5E8D0E9455F7018348E9DFC7F8E6",
+  "InputDrawCount": 1421,
+  "Seed": 20261110,
+  "Configuration": "sets=2;cover=8;unique-v2",
+  "CodeVersion": "git:a2a79d09b639259133ddebb0a161951b8f015743;cli:14c040b4-88a4-4241-99da-ea56e34bd52c;core:a4bdbe53-c4bd-4557-ad60-2f3ac951ad21",
+  "Tickets": [
+    {
+      "Strategy": "hot",
+      "Ticket": {
+        "Numbers": [
+          6,
+          14,
+          18,
+          20,
+          23,
+          24
+        ],
+        "Special": null
+      }
+    },
+    {
+      "Strategy": "hot",
+      "Ticket": {
+        "Numbers": [
+          6,
+          7,
+          11,
+          23,
+          26,
+          55
+        ],
+        "Special": null
+      }
+    },
+    {
+      "Strategy": "cold",
+      "Ticket": {
+        "Numbers": [
+          11,
+          17,
+          21,
+          40,
+          47,
+          51
+        ],
+        "Special": null
+      }
+    },
+    {
+      "Strategy": "cold",
+      "Ticket": {
+        "Numbers": [
+          3,
+          11,
+          16,
+          32,
+          47,
+          51
+        ],
+        "Special": null
+      }
+    },
+    {
+      "Strategy": "balanced",
+      "Ticket": {
+        "Numbers": [
+          16,
+          17,
+          25,
+          33,
+          38,
+          42
+        ],
+        "Special": null
+      }
+    },
+    {
+      "Strategy": "balanced",
+      "Ticket": {
+        "Numbers": [
+          17,
+          24,
+          26,
+          33,
+          37,
+          54
+        ],
+        "Special": null
+      }
+    },
+    {
+      "Strategy": "random",
+      "Ticket": {
+        "Numbers": [
+          17,
+          18,
+          24,
+          40,
+          43,
+          54
+        ],
+        "Special": null
+      }
+    },
+    {
+      "Strategy": "random",
+      "Ticket": {
+        "Numbers": [
+          1,
+          8,
+          10,
+          26,
+          28,
+          31
+        ],
+        "Special": null
+      }
+    },
+    {
+      "Strategy": "cover",
+      "Ticket": {
+        "Numbers": [
+          3,
+          11,
+          13,
+          16,
+          24,
+          45
+        ],
+        "Special": null
+      }
+    },
+    {
+      "Strategy": "cover",
+      "Ticket": {
+        "Numbers": [
+          4,
+          12,
+          20,
+          33,
+          34,
+          36
+        ],
+        "Special": null
+      }
+    },
+    {
+      "Strategy": "cover",
+      "Ticket": {
+        "Numbers": [
+          6,
+          10,
+          19,
+          21,
+          38,
+          53
+        ],
+        "Special": null
+      }
+    },
+    {
+      "Strategy": "cover",
+      "Ticket": {
+        "Numbers": [
+          1,
+          9,
+          18,
+          35,
+          46,
+          49
+        ],
+        "Special": null
+      }
+    },
+    {
+      "Strategy": "cover",
+      "Ticket": {
+        "Numbers": [
+          31,
+          37,
+          41,
+          47,
+          50,
+          52
+        ],
+        "Special": null
+      }
+    },
+    {
+      "Strategy": "cover",
+      "Ticket": {
+        "Numbers": [
+          7,
+          23,
+          25,
+          32,
+          44,
+          51
+        ],
+        "Special": null
+      }
+    },
+    {
+      "Strategy": "cover",
+      "Ticket": {
+        "Numbers": [
+          2,
+          27,
+          28,
+          29,
+          39,
+          40
+        ],
+        "Special": null
+      }
+    },
+    {
+      "Strategy": "cover",
+      "Ticket": {
+        "Numbers": [
+          5,
+          15,
+          17,
+          22,
+          43,
+          55
+        ],
+        "Special": null
+      }
+    }
+  ]
+}
