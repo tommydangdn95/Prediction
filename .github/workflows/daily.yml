@@ -46,6 +46,15 @@ jobs:
             $CLI import --csv data/seed/draws_seed.csv
           fi
 
+      # vietlott.vn trả 403 cho IP của GitHub: đi qua VPN về router nhà (IP Việt Nam) — docs/vpn-router.md.
+      # Không có secret hoặc VPN lỗi thì chỉ cảnh báo; Mega/Power vẫn lấy được từ minhngoc.
+      - name: Kết nối VPN về router (IP Việt Nam)
+        env:
+          WG_CONF: ${{ secrets.VPN_WIREGUARD_CONF }}
+          OVPN_CONF: ${{ secrets.VPN_OPENVPN_CONF }}
+          OVPN_AUTH: ${{ secrets.VPN_OPENVPN_AUTH }}
+        run: bash .github/scripts/vpn-up.sh
+
       - name: Lấy kết quả mới
         run: |
           set +e
@@ -59,6 +68,10 @@ jobs:
           elif [ "$code" = "2" ]; then
             echo "::warning::Một số game không lấy được dữ liệu mới — xem log bước này."
           fi
+
+      - name: Ngắt VPN
+        if: always()
+        run: bash .github/scripts/vpn-down.sh
 
       - name: Lưu lịch sử + tạo báo cáo
         run: |

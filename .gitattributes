@@ -2,3 +2,4 @@
 *.html text
 *.csv text
 *.db binary
+*.sh text eol=lf

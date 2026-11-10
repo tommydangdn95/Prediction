@@ -49,6 +49,7 @@ khác lúc 14:00.
 ## 3. Kiểm tra
 
 - Chạy tay: tab **Actions** → *Daily predictions* → **Run workflow**, hoặc nút "Test run" trên cron-job.org.
+- vietlott.vn trả 403 cho IP của GitHub runner → cần VPN về router nhà, xem [vpn-router.md](vpn-router.md).
 - Lỗi "Không lấy được dữ liệu game nào": vietlott/minhngoc có thể chặn IP của GitHub runner. Khi đó job
   báo đỏ (GitHub gửi email), không commit gì; lịch sử cũ trong `data/history.csv` vẫn còn nguyên.
 - Fine-grained token hết hạn → cron-job.org báo 401; tạo token mới và thay header `Authorization`.
