@@ -1,57 +1,57 @@
-# Gợi ý Vietlott — 11/11/2026
+# Gợi ý Vietlott — 12/11/2026
 
 > **Mỗi kỳ quay là độc lập. Thống kê quá khứ không làm tăng xác suất trúng.**
 > Mọi bộ số — kể cả bộ ngẫu nhiên — có cùng xác suất trúng. Bộ gợi ý chỉ phản ánh đặc điểm dữ liệu quá khứ.
 
-Tạo báo cáo lúc 19:15 11/11/2026 (giờ VN). Mỗi cách chọn là một phương án mua riêng.
+Tạo báo cáo lúc 09:54 12/11/2026 (giờ VN). Mỗi cách chọn là một phương án mua riêng.
 
 ## Lotto 5/35
 
-- Kỳ mới nhất: **#01001** 11/11/2026 — `09 10 12 15 31 | 05`
-- Lịch sử dùng để gợi ý: 1001 kỳ (#00001 → #01001)
-- Tỉ lệ một số bất kỳ có mặt trong kết quả: kỳ vọng 14,29 % số kỳ; thực tế từ 11,89 % (số 12) đến 16,68 % (số 22).
-- Kiểm định tần suất χ² đã hiệu chỉnh rút không hoàn lại trên 1001 kỳ: p = 0.0240 → có dấu hiệu lệch tần suất ở ngưỡng 5% chưa hiệu chỉnh nhiều phép thử.
+- Kỳ mới nhất: **#01002** 11/11/2026 — `07 19 24 25 27 | 11`
+- Lịch sử dùng để gợi ý: 1002 kỳ (#00001 → #01002)
+- Tỉ lệ một số bất kỳ có mặt trong kết quả: kỳ vọng 14,29 % số kỳ; thực tế từ 11,88 % (số 12) đến 16,67 % (số 22).
+- Kiểm định tần suất χ² đã hiệu chỉnh rút không hoàn lại trên 1002 kỳ: p = 0.0245 → có dấu hiệu lệch tần suất ở ngưỡng 5% chưa hiệu chỉnh nhiều phép thử.
   Đây là kiểm định tần suất riêng lẻ, không chứng minh tính độc lập hay khả năng dự đoán. p là xấp xỉ; cần thận trọng khi ít dữ liệu và khi thử nhiều game/nhiều lần.
 
-### Kiểm tra gợi ý ngày 10/11/2026 → kỳ #01000 (10/11/2026): `04 08 12 21 26 | 05`
+### Kiểm tra gợi ý ngày 11/11/2026 → kỳ #01002 (11/11/2026): `07 19 24 25 27 | 11`
 
 | Chiến lược | Bộ số | ĐB | Trùng | Kết quả |
 |---|---|---|---|---|
-| hot | 01 25 29 33 35 | **05** ✓ | 0/5 + ĐB | 🎉 Khuyến khích |
-| hot | 10 20 22 **26** 29 | 01 | 1/5 | - |
-| cold | 03 **08** 10 14 28 | 12 | 1/5 | - |
-| cold | 07 **08** 19 24 32 | 03 | 1/5 | - |
-| balanced | 01 02 **26** 33 34 | **05** ✓ | 1/5 + ĐB | 🎉 Khuyến khích |
-| balanced | 06 **12** 16 **21** 25 | 04 | 2/5 | - |
-| random | **12** 15 22 29 35 | 09 | 1/5 | - |
-| random | 03 07 09 27 30 | 10 | 0/5 | - |
-| cover | 01 14 23 24 **26** | 01 | 1/5 | - |
-| cover | 02 09 10 22 32 | 12 | 0/5 | - |
-| cover | **04** 06 07 13 20 | 10 | 1/5 | - |
-| cover | **12** 18 **21** 25 35 | 07 | 2/5 | - |
-| cover | 03 **08** 15 19 29 | **05** ✓ | 1/5 + ĐB | 🎉 Khuyến khích |
-| cover | 05 17 30 33 34 | 04 | 0/5 | - |
-| cover | 11 16 27 28 31 | 03 | 0/5 | - |
-| cover | 11 **12** 19 20 23 | 06 | 1/5 | - |
+| hot | 02 04 08 18 26 | 06 | 0/5 | - |
+| hot | 02 04 08 15 35 | 05 | 0/5 | - |
+| cold | **07** 17 **19** 30 32 | 09 | 2/5 | - |
+| cold | 03 **07** 14 17 20 | 02 | 1/5 | - |
+| balanced | 06 11 23 30 35 | 12 | 0/5 | - |
+| balanced | 06 16 23 **24** 33 | **11** ✓ | 1/5 + ĐB | 🎉 Khuyến khích |
+| random | 05 **07** 12 17 34 | 05 | 1/5 | - |
+| random | 04 **07** **19** **27** 30 | 04 | 3/5 | 🎉 Giải Năm |
+| cover | 03 06 08 12 18 | 01 | 0/5 | - |
+| cover | 14 21 22 29 33 | 08 | 0/5 | - |
+| cover | 01 17 26 34 35 | 10 | 0/5 | - |
+| cover | 02 **07** 09 **19** 28 | 12 | 2/5 | - |
+| cover | 05 10 15 31 32 | 05 | 0/5 | - |
+| cover | 04 11 20 **27** 30 | 06 | 1/5 | - |
+| cover | 13 16 23 **24** **25** | 07 | 2/5 | - |
+| cover | 09 11 13 26 31 | 03 | 0/5 | - |
 
-Kỳ này: 13 số trùng trên 16 bộ (kỳ vọng ngẫu nhiên 11.4), 3 bộ trúng giải (kỳ vọng 1.5).
+Kỳ này: 13 số trùng trên 16 bộ (kỳ vọng ngẫu nhiên 11.4), 2 bộ trúng giải (kỳ vọng 1.5).
 
-<details><summary>Thành tích thực tế cộng dồn (1 kỳ đã đối chiếu)</summary>
+<details><summary>Thành tích thực tế cộng dồn (2 kỳ đã đối chiếu)</summary>
 
 | Chiến lược | Số bộ | Trùng TB/bộ | Kỳ vọng | Trúng giải | Kỳ vọng | Trùng ĐB |
 |---|---:|---:|---:|---:|---:|---:|
-| balanced | 2 | 1.500 | 0.714 | 1 | 0.2 | 1/2 |
-| cold | 2 | 1.000 | 0.714 | 0 | 0.2 | 0/2 |
-| cover | 8 | 0.750 | 0.714 | 1 | 0.8 | 1/8 |
-| hot | 2 | 0.500 | 0.714 | 1 | 0.2 | 1/2 |
-| random | 2 | 0.500 | 0.714 | 0 | 0.2 | 0/2 |
+| balanced | 4 | 1.000 | 0.714 | 2 | 0.4 | 2/4 |
+| cold | 4 | 1.250 | 0.714 | 0 | 0.4 | 0/4 |
+| cover | 16 | 0.688 | 0.714 | 1 | 1.5 | 1/16 |
+| hot | 4 | 0.250 | 0.714 | 1 | 0.4 | 1/4 |
+| random | 4 | 1.250 | 0.714 | 1 | 0.4 | 0/4 |
 
 Chỉ tính bản đầu tiên mỗi kỳ đã lưu trước giờ quay và khớp lịch sử đầu vào. Thời gian trong file không thay thế bằng chứng công bố độc lập; có thể đối chiếu commit trước giờ quay. Chưa thể suy ra lợi thế dự đoán từ chênh lệch nhỏ trên ít kỳ.
 
 </details>
 
-- Kỳ mục tiêu: **#01002**, bắt đầu 21:00 11/11/2026 (giờ VN).
-- Bộ số tạo lúc 15:48:56 11/11/2026 · seed `20261111` · `sets=2;cover=8;unique-v2`. Chạy lại cùng kỳ giữ nguyên bộ đã lưu.
+- Kỳ mục tiêu: **#01003**, bắt đầu 13:00 12/11/2026 (giờ VN).
+- Bộ số tạo lúc 09:54:41 12/11/2026 · seed `20261112` · `sets=2;cover=8;unique-v2`. Chạy lại cùng kỳ giữ nguyên bộ đã lưu.
 
 ### Phương án phủ số (8 vé)
 
@@ -62,28 +62,28 @@ Chi phí 8 vé: **80.000đ**. Trúng giải bất kỳ không đồng nghĩa hò
 
 | Vé | Bộ số | ĐB | Mua từ vé 1 đến vé này: có ≥1 vé trúng | …có ≥1 vé trùng ≥3 số | Cùng số vé ngẫu nhiên khác nhau |
 |---|---|---|---:|---:|---:|
-| cover 1 | `03 06 08 12 18` | `01` | **9,60 %** | 1,39 % | 9,60 % |
-| cover 2 | `14 21 22 29 33` | `08` | **18,98 %** | 2,77 % | 18,29 % |
-| cover 3 | `01 17 26 34 35` | `10` | **28,12 %** | 4,16 % | 26,13 % |
-| cover 4 | `02 07 09 19 28` | `12` | **37,03 %** | 5,55 % | 33,23 % |
-| cover 5 | `05 10 15 31 32` | `05` | **45,71 %** | 6,93 % | 39,64 % |
-| cover 6 | `04 11 20 27 30` | `06` | **54,16 %** | 8,32 % | 45,44 % |
-| cover 7 | `13 16 23 24 25` | `07` | **62,38 %** | 9,71 % | 50,68 % |
-| cover 8 | `09 11 13 26 31` | `03` | **70,35 %** | 11,04 % | 55,42 % |
+| cover 1 | `06 17 26 29 32` | `10` | **9,60 %** | 1,39 % | 9,60 % |
+| cover 2 | `08 14 20 24 31` | `06` | **18,98 %** | 2,77 % | 18,29 % |
+| cover 3 | `02 09 28 33 35` | `03` | **28,12 %** | 4,16 % | 26,13 % |
+| cover 4 | `04 10 12 18 19` | `01` | **37,03 %** | 5,55 % | 33,23 % |
+| cover 5 | `07 11 13 21 25` | `11` | **45,71 %** | 6,93 % | 39,64 % |
+| cover 6 | `03 05 16 23 27` | `02` | **54,16 %** | 8,32 % | 45,44 % |
+| cover 7 | `01 15 22 30 34` | `05` | **62,38 %** | 9,71 % | 50,68 % |
+| cover 8 | `08 09 15 19 23` | `07` | **70,35 %** | 11,04 % | 55,42 % |
 
 - Với Lotto 5/35: giải Khuyến khích (0–2 số + ĐB) chiếm 86 % số lần trúng và chỉ cần trùng số ĐB (01–12), nên số ĐB khác nhau là lợi thế chính: 5 vé phủ 5/12 khả năng của số ĐB; 12 vé có đủ 12 số ĐB thì kỳ nào cũng có vé trúng, nhưng vẫn có thể lỗ tiền.
 - Độc đắc (5 số + ĐB): 8 vé khác nhau có khả năng đúng bằng 8 lần một vé — khoảng 1 trên 486.948, chọn số kiểu gì cũng vậy.
 - Phủ số thay đổi xác suất cả nhóm có giải; không làm tăng xác suất của từng vé hoặc bảo đảm lợi nhuận.
 
-**Thử lại trên lịch sử:** nếu 981 kỳ đã quay (#00021 → #01001) mỗi kỳ bạn mua 8 vé, số kỳ có ít nhất 1 vé trúng là:
+**Thử lại trên lịch sử:** nếu 982 kỳ đã quay (#00021 → #01002) mỗi kỳ bạn mua 8 vé, số kỳ có ít nhất 1 vé trúng là:
 
-- **cover → 70,03 % (khoảng 7 trong 10 kỳ)**
-- random → 55,11 % (khoảng 6 trong 10 kỳ)
-- hot → 34,91 % (khoảng 1 trong 3 kỳ)
-- cold → 36,63 % (khoảng 1 trong 3 kỳ)
-- balanced → 55,36 % (khoảng 6 trong 10 kỳ)
+- **cover → 70,60 % (khoảng 7 trong 10 kỳ)**
+- random → 55,55 % (khoảng 6 trong 10 kỳ)
+- hot → 34,53 % (khoảng 1 trong 3 kỳ)
+- cold → 36,58 % (khoảng 1 trong 3 kỳ)
+- balanced → 55,33 % (khoảng 6 trong 10 kỳ)
 
-Tiền: mỗi kỳ chi 80.000đ, thu về trung bình 13.943đ với phủ số và 12.931đ với vé ngẫu nhiên (chỉ tính giải cố định, chưa trừ thuế, không tính Jackpot). Về lâu dài mọi cách chọn thu về như nhau — chênh lệch tiền ở đây là may rủi. Phủ số chỉ thay đổi **số kỳ có vé trúng**, không làm tăng tiền thưởng.
+Tiền: mỗi kỳ chi 80.000đ, thu về trung bình 13.164đ với phủ số và 13.416đ với vé ngẫu nhiên (chỉ tính giải cố định, chưa trừ thuế, không tính Jackpot). Về lâu dài mọi cách chọn thu về như nhau — chênh lệch tiền ở đây là may rủi. Phủ số chỉ thay đổi **số kỳ có vé trúng**, không làm tăng tiền thưởng.
 
 ### Bộ theo thống kê (tham khảo)
 
@@ -91,14 +91,14 @@ Chọn theo tần suất (hot), số gan (cold), cân bằng chẵn/lẻ–nhỏ
 
 | Chiến lược | Bộ số | ĐB | Chẵn/Lẻ | Nhỏ/Lớn (≤17) | Tổng |
 |---|---|---|---|---|---:|
-| hot | `02 04 08 18 26` | `06` | 5/0 | 3/2 | 58 |
-| hot | `02 04 08 15 35` | `05` | 3/2 | 4/1 | 64 |
-| cold | `07 17 19 30 32` | `09` | 2/3 | 2/3 | 105 |
-| cold | `03 07 14 17 20` | `02` | 2/3 | 4/1 | 61 |
-| balanced | `06 11 23 30 35` | `12` | 2/3 | 2/3 | 105 |
-| balanced | `06 16 23 24 33` | `11` | 3/2 | 2/3 | 102 |
-| random (đối chứng) | `05 07 12 17 34` | `05` | 2/3 | 4/1 | 75 |
-| random (đối chứng) | `04 07 19 27 30` | `04` | 2/3 | 2/3 | 87 |
+| hot | `08 10 25 27 35` | `06` | 2/3 | 2/3 | 105 |
+| hot | `02 06 08 12 35` | `11` | 4/1 | 4/1 | 63 |
+| cold | `03 11 16 23 29` | `02` | 1/4 | 3/2 | 82 |
+| cold | `13 17 23 30 34` | `02` | 2/3 | 2/3 | 117 |
+| balanced | `02 08 21 29 34` | `12` | 3/2 | 2/3 | 94 |
+| balanced | `08 13 26 27 29` | `07` | 2/3 | 2/3 | 103 |
+| random (đối chứng) | `20 22 23 26 29` | `04` | 3/2 | 0/5 | 120 |
+| random (đối chứng) | `03 06 20 25 35` | `09` | 2/3 | 2/3 | 89 |
 
 **Khả năng của mỗi bộ ở kỳ tới** (giống nhau cho mọi bộ, kể cả random): trúng giải bất kỳ **9,60 %** · trúng ≥3 số **1,39 %** · Độc đắc **0,0000257 %** (1 / 3.895.584).
 
@@ -110,34 +110,34 @@ Số ĐB trùng: 8,33 % (độc lập với số chính).
 
 <details><summary>Backtest walk-forward</summary>
 
-**Từng vé: 981 kỳ thật, 300 lần lấy mẫu/kỳ**
+**Từng vé: 982 kỳ thật, 300 lần lấy mẫu/kỳ**
 
 | Chiến lược | Số chính trùng TB | Trúng giải | Δ với random (điểm %) | CI 95% của Δ (điểm %) | p trúng giải |
 |---|---|---|---|---|---|
-| random | 0.715 | 9,60 % | - | - | - |
-| hot | 0.710 | 9,19 % | -0.412 | -1.164 đến +0.339 | 0.2821 |
-| cold | 0.723 | 9,53 % | -0.073 | -0.820 đến +0.674 | 0.8472 |
-| balanced | 0.717 | 9,64 % | +0.039 | -0.114 đến +0.193 | 0.6142 |
+| random | 0.712 | 9,57 % | - | - | - |
+| hot | 0.706 | 9,02 % | -0.548 | -1.300 đến +0.204 | 0.1531 |
+| cold | 0.723 | 9,60 % | +0.034 | -0.715 đến +0.782 | 0.9298 |
+| balanced | 0.715 | 9,58 % | +0.013 | -0.138 đến +0.164 | 0.867 |
 
 **Cùng 8 vé khác nhau/kỳ, 37 nhóm mô phỏng/kỳ**
 
 | Cách chọn | Có ≥1 giải | Khoảng 95% theo kỳ | Δ với random (điểm %) | CI 95% của Δ (điểm %) | p có ≥1 giải |
 |---|---|---|---|---|---|
-| cover | 70,03 % | 65,69 % đến 74,36 % | +14.910 | +14.205 đến +15.615 | 5.059E-218 |
-| random | 55,11 % | 50,78 % đến 59,45 % | - | - | - |
-| hot | 34,91 % | 30,57 % đến 39,25 % | -20.206 | -22.771 đến -17.640 | 2.155E-48 |
-| cold | 36,63 % | 32,29 % đến 40,96 % | -18.489 | -21.067 đến -15.911 | 4.183E-41 |
-| balanced | 55,36 % | 51,02 % đến 59,69 % | +0.242 | -0.469 đến +0.954 | 0.504 |
+| cover | 70,60 % | 66,27 % đến 74,94 % | +15.058 | +14.345 đến +15.770 | 7.852E-218 |
+| random | 55,55 % | 51,21 % đến 59,88 % | - | - | - |
+| hot | 34,53 % | 30,20 % đến 38,87 % | -21.013 | -23.603 đến -18.423 | 6.084E-51 |
+| cold | 36,58 % | 32,25 % đến 40,92 % | -18.963 | -21.549 đến -16.377 | 9.62E-43 |
+| balanced | 55,33 % | 50,99 % đến 59,66 % | -0.220 | -0.937 đến +0.497 | 0.5468 |
 
 **Mô hình tiền giải cơ bản: chi 80.000đ/kỳ**
 
 | Cách chọn | Thưởng TB/kỳ | Lãi/lỗ TB/kỳ | ROI cơ bản | Thu ≥ chi | Thu > chi |
 |---|---|---|---|---|---|
-| cover | 13.943đ | -66.057đ | -82,57% | 1,17 % | 1,17 % |
-| random | 12.931đ | -67.069đ | -83,84% | 1,26 % | 1,25 % |
-| hot | 12.183đ | -67.817đ | -84,77% | 1,26 % | 1,17 % |
-| cold | 15.069đ | -64.931đ | -81,16% | 1,34 % | 1,28 % |
-| balanced | 13.762đ | -66.238đ | -82,80% | 1,26 % | 1,23 % |
+| cover | 13.164đ | -66.836đ | -83,55% | 1,23 % | 1,23 % |
+| random | 13.416đ | -66.584đ | -83,23% | 1,31 % | 1,28 % |
+| hot | 12.342đ | -67.658đ | -84,57% | 1,23 % | 1,13 % |
+| cold | 14.455đ | -65.545đ | -81,93% | 1,50 % | 1,42 % |
+| balanced | 14.165đ | -65.835đ | -82,29% | 1,37 % | 1,33 % |
 
 Đánh giá trúng giải theo từng kỳ thật; ngưỡng Bonferroni p < 0.00238 cho tối đa 21 so sánh trên các game được chọn. CI ghép cặp là xấp xỉ t 95% chưa hiệu chỉnh; khoảng của tỷ lệ nhóm dùng Hoeffding theo số kỳ. Dấu '-' là chưa đủ thông tin để ước lượng.
 
@@ -147,7 +147,7 @@ Các lần lặp chỉ giảm nhiễu mô phỏng, không làm tăng số kỳ �
 
 Giải cơ bản trước thuế; loại trừ Jackpot và phần chia thêm Lotto 5/35. Các cột tiền, ROI, thu ≥ chi và thu > chi chỉ thuộc mô hình này; không phải tiền thực nhận hay xác suất có lời đầy đủ. Không lấy toàn bộ quỹ Jackpot làm tiền thưởng cho một vé.
 
-Tổng chi của một chuỗi mua 8 vé qua 981 kỳ: 78.480.000đ. Mỗi cách chọn là phương án thay thế với cùng ngân sách; tiền thưởng và lãi/lỗ trong bảng là trung bình mỗi kỳ, không cộng tiền giữa các lần mô phỏng.
+Tổng chi của một chuỗi mua 8 vé qua 982 kỳ: 78.560.000đ. Mỗi cách chọn là phương án thay thế với cùng ngân sách; tiền thưởng và lãi/lỗ trong bảng là trung bình mỗi kỳ, không cộng tiền giữa các lần mô phỏng.
 
 </details>
 
@@ -170,11 +170,11 @@ Tổng chi của một chuỗi mua 8 vé qua 981 kỳ: 78.480.000đ. Mỗi cách
 
 | Kỳ | Ngày | Kết quả | Jackpot 1 |
 |---|---|---|---:|
+| #01002 | 11/11/2026 | `07 19 24 25 27 | 11` | - |
 | #01001 | 11/11/2026 | `09 10 12 15 31 | 05` | - |
 | #01000 | 10/11/2026 | `04 08 12 21 26 | 05` | - |
 | #00999 | 10/11/2026 | `01 05 18 26 33 | 07` | - |
 | #00998 | 09/11/2026 | `06 15 22 27 31 | 01` | - |
-| #00997 | 09/11/2026 | `04 16 26 27 29 | 06` | - |
 
 </details>
 
@@ -250,13 +250,13 @@ Chi phí 8 vé: **80.000đ**. Trúng giải bất kỳ không đồng nghĩa hò
 
 **Thử lại trên lịch sử:** nếu 1.567 kỳ đã quay (#00021 → #01587) mỗi kỳ bạn mua 8 vé, số kỳ có ít nhất 1 vé trúng là:
 
-- **cover → 18,93 % (khoảng 1 trong 5 kỳ)**
-- random → 17,47 % (khoảng 1 trong 6 kỳ)
-- hot → 14,19 % (khoảng 1 trong 7 kỳ)
-- cold → 13,82 % (khoảng 1 trong 7 kỳ)
-- balanced → 17,63 % (khoảng 1 trong 6 kỳ)
+- **cover → 18,55 % (khoảng 1 trong 5 kỳ)**
+- random → 17,49 % (khoảng 1 trong 6 kỳ)
+- hot → 14,14 % (khoảng 1 trong 7 kỳ)
+- cold → 13,54 % (khoảng 1 trong 7 kỳ)
+- balanced → 17,54 % (khoảng 1 trong 6 kỳ)
 
-Tiền: mỗi kỳ chi 80.000đ, thu về trung bình 11.092đ với phủ số và 10.926đ với vé ngẫu nhiên (chỉ tính giải cố định, chưa trừ thuế, không tính Jackpot). Về lâu dài mọi cách chọn thu về như nhau — chênh lệch tiền ở đây là may rủi. Phủ số chỉ thay đổi **số kỳ có vé trúng**, không làm tăng tiền thưởng.
+Tiền: mỗi kỳ chi 80.000đ, thu về trung bình 10.670đ với phủ số và 11.264đ với vé ngẫu nhiên (chỉ tính giải cố định, chưa trừ thuế, không tính Jackpot). Về lâu dài mọi cách chọn thu về như nhau — chênh lệch tiền ở đây là may rủi. Phủ số chỉ thay đổi **số kỳ có vé trúng**, không làm tăng tiền thưởng.
 
 ### Bộ theo thống kê (tham khảo)
 
@@ -285,30 +285,30 @@ Chọn theo tần suất (hot), số gan (cold), cân bằng chẵn/lẻ–nhỏ
 
 | Chiến lược | Số chính trùng TB | Trúng giải | Δ với random (điểm %) | CI 95% của Δ (điểm %) | p trúng giải |
 |---|---|---|---|---|---|
-| random | 0.801 | 2,38 % | - | - | - |
-| hot | 0.800 | 2,37 % | -0.016 | -0.220 đến +0.188 | 0.878 |
-| cold | 0.789 | 2,28 % | -0.099 | -0.299 đến +0.100 | 0.3284 |
-| balanced | 0.801 | 2,38 % | -0.003 | -0.066 đến +0.061 | 0.9368 |
+| random | 0.799 | 2,40 % | - | - | - |
+| hot | 0.802 | 2,35 % | -0.052 | -0.257 đến +0.153 | 0.6169 |
+| cold | 0.789 | 2,25 % | -0.152 | -0.353 đến +0.049 | 0.1391 |
+| balanced | 0.798 | 2,36 % | -0.039 | -0.104 đến +0.027 | 0.244 |
 
 **Cùng 8 vé khác nhau/kỳ, 37 nhóm mô phỏng/kỳ**
 
 | Cách chọn | Có ≥1 giải | Khoảng 95% theo kỳ | Δ với random (điểm %) | CI 95% của Δ (điểm %) | p có ≥1 giải |
 |---|---|---|---|---|---|
-| cover | 18,93 % | 15,50 % đến 22,36 % | +1.457 | +1.010 đến +1.905 | 2.161E-10 |
-| random | 17,47 % | 14,04 % đến 20,90 % | - | - | - |
-| hot | 14,19 % | 10,76 % đến 17,62 % | -3.279 | -4.325 đến -2.233 | 9.925E-10 |
-| cold | 13,82 % | 10,38 % đến 17,25 % | -3.655 | -4.719 đến -2.591 | 2.247E-11 |
-| balanced | 17,63 % | 14,20 % đến 21,06 % | +0.164 | -0.301 đến +0.629 | 0.4895 |
+| cover | 18,55 % | 15,12 % đến 21,98 % | +1.062 | +0.623 đến +1.502 | 2.343E-06 |
+| random | 17,49 % | 14,05 % đến 20,92 % | - | - | - |
+| hot | 14,14 % | 10,71 % đến 17,57 % | -3.346 | -4.415 đến -2.277 | 1.056E-09 |
+| cold | 13,54 % | 10,11 % đến 16,97 % | -3.948 | -4.999 đến -2.897 | 2.771E-13 |
+| balanced | 17,54 % | 14,11 % đến 20,97 % | +0.053 | -0.411 đến +0.518 | 0.8213 |
 
 **Mô hình tiền giải cơ bản: chi 80.000đ/kỳ**
 
 | Cách chọn | Thưởng TB/kỳ | Lãi/lỗ TB/kỳ | ROI cơ bản | Thu ≥ chi | Thu > chi |
 |---|---|---|---|---|---|
-| cover | 11.092đ | -68.908đ | -86,13% | 1,11 % | 1,11 % |
-| random | 10.926đ | -69.074đ | -86,34% | 1,12 % | 1,12 % |
-| hot | 11.038đ | -68.962đ | -86,20% | 1,59 % | 1,59 % |
-| cold | 10.032đ | -69.968đ | -87,46% | 1,53 % | 1,53 % |
-| balanced | 10.522đ | -69.478đ | -86,85% | 1,14 % | 1,14 % |
+| cover | 10.670đ | -69.330đ | -86,66% | 1,12 % | 1,12 % |
+| random | 11.264đ | -68.736đ | -85,92% | 1,18 % | 1,18 % |
+| hot | 10.837đ | -69.163đ | -86,45% | 1,63 % | 1,63 % |
+| cold | 9.981đ | -70.019đ | -87,52% | 1,53 % | 1,53 % |
+| balanced | 10.736đ | -69.264đ | -86,58% | 1,22 % | 1,22 % |
 
 Đánh giá trúng giải theo từng kỳ thật; ngưỡng Bonferroni p < 0.00238 cho tối đa 21 so sánh trên các game được chọn. CI ghép cặp là xấp xỉ t 95% chưa hiệu chỉnh; khoảng của tỷ lệ nhóm dùng Hoeffding theo số kỳ. Dấu '-' là chưa đủ thông tin để ước lượng.
 
@@ -418,13 +418,13 @@ Chi phí 8 vé: **80.000đ**. Trúng giải bất kỳ không đồng nghĩa hò
 
 **Thử lại trên lịch sử:** nếu 1.402 kỳ đã quay (#00021 → #01422) mỗi kỳ bạn mua 8 vé, số kỳ có ít nhất 1 vé trúng là:
 
-- **cover → 10,66 % (khoảng 1 trong 9 kỳ)**
-- random → 10,11 % (khoảng 1 trong 10 kỳ)
-- hot → 8,61 % (khoảng 1 trong 12 kỳ)
-- cold → 8,99 % (khoảng 1 trong 11 kỳ)
-- balanced → 10,08 % (khoảng 1 trong 10 kỳ)
+- **cover → 10,84 % (khoảng 1 trong 9 kỳ)**
+- random → 10,03 % (khoảng 1 trong 10 kỳ)
+- hot → 8,52 % (khoảng 1 trong 12 kỳ)
+- cold → 8,97 % (khoảng 1 trong 11 kỳ)
+- balanced → 10,16 % (khoảng 1 trong 10 kỳ)
 
-Tiền: mỗi kỳ chi 80.000đ, thu về trung bình 10.786đ với phủ số và 9.870đ với vé ngẫu nhiên (chỉ tính giải cố định, chưa trừ thuế, không tính Jackpot). Về lâu dài mọi cách chọn thu về như nhau — chênh lệch tiền ở đây là may rủi. Phủ số chỉ thay đổi **số kỳ có vé trúng**, không làm tăng tiền thưởng.
+Tiền: mỗi kỳ chi 80.000đ, thu về trung bình 13.954đ với phủ số và 12.168đ với vé ngẫu nhiên (chỉ tính giải cố định, chưa trừ thuế, không tính Jackpot). Về lâu dài mọi cách chọn thu về như nhau — chênh lệch tiền ở đây là may rủi. Phủ số chỉ thay đổi **số kỳ có vé trúng**, không làm tăng tiền thưởng.
 
 ### Bộ theo thống kê (tham khảo)
 
@@ -453,34 +453,34 @@ Chọn theo tần suất (hot), số gan (cold), cân bằng chẵn/lẻ–nhỏ
 
 | Chiến lược | Số chính trùng TB | Trúng giải | Δ với random (điểm %) | CI 95% của Δ (điểm %) | p trúng giải |
 |---|---|---|---|---|---|
-| random | 0.655 | 1,32 % | - | - | - |
-| hot | 0.655 | 1,37 % | +0.047 | -0.112 đến +0.206 | 0.5631 |
-| cold | 0.659 | 1,49 % | +0.160 | -0.007 đến +0.327 | 0.05992 |
-| balanced | 0.654 | 1,34 % | +0.013 | -0.038 đến +0.064 | 0.6214 |
+| random | 0.655 | 1,35 % | - | - | - |
+| hot | 0.658 | 1,38 % | +0.032 | -0.129 đến +0.193 | 0.7 |
+| cold | 0.660 | 1,46 % | +0.114 | -0.049 đến +0.277 | 0.1718 |
+| balanced | 0.654 | 1,34 % | -0.006 | -0.058 đến +0.046 | 0.8216 |
 
 **Cùng 8 vé khác nhau/kỳ, 37 nhóm mô phỏng/kỳ**
 
 | Cách chọn | Có ≥1 giải | Khoảng 95% theo kỳ | Δ với random (điểm %) | CI 95% của Δ (điểm %) | p có ≥1 giải |
 |---|---|---|---|---|---|
-| cover | 10,66 % | 7,03 % đến 14,29 % | +0.549 | +0.189 đến +0.910 | 0.002826 |
-| random | 10,11 % | 6,48 % đến 13,74 % | - | - | - |
-| hot | 8,61 % | 4,98 % đến 12,24 % | -1.500 | -2.387 đến -0.613 | 0.0009314 |
-| cold | 8,99 % | 5,37 % đến 12,62 % | -1.114 | -2.028 đến -0.200 | 0.0169 |
-| balanced | 10,08 % | 6,46 % đến 13,71 % | -0.027 | -0.404 đến +0.350 | 0.8883 |
+| cover | 10,84 % | 7,22 % đến 14,47 % | +0.810 | +0.446 đến +1.173 | 1.354E-05 |
+| random | 10,03 % | 6,41 % đến 13,66 % | - | - | - |
+| hot | 8,52 % | 4,89 % đến 12,15 % | -1.513 | -2.388 đến -0.638 | 0.00071 |
+| cold | 8,97 % | 5,34 % đến 12,59 % | -1.068 | -1.992 đến -0.144 | 0.02357 |
+| balanced | 10,16 % | 6,53 % đến 13,78 % | +0.121 | -0.253 đến +0.496 | 0.525 |
 
 **Mô hình tiền giải cơ bản: chi 80.000đ/kỳ**
 
 | Cách chọn | Thưởng TB/kỳ | Lãi/lỗ TB/kỳ | ROI cơ bản | Thu ≥ chi | Thu > chi |
 |---|---|---|---|---|---|
-| cover | 10.786đ | -69.214đ | -86,52% | 0,580 % | 0,580 % |
-| random | 9.870đ | -70.130đ | -87,66% | 0,889 % | 0,889 % |
-| hot | 10.577đ | -69.423đ | -86,78% | 1,99 % | 1,99 % |
-| cold | 9.793đ | -70.207đ | -87,76% | 2,24 % | 2,24 % |
-| balanced | 12.988đ | -67.012đ | -83,76% | 0,968 % | 0,968 % |
+| cover | 13.954đ | -66.046đ | -82,56% | 0,578 % | 0,578 % |
+| random | 12.168đ | -67.832đ | -84,79% | 0,966 % | 0,966 % |
+| hot | 12.235đ | -67.765đ | -84,71% | 2,02 % | 2,02 % |
+| cold | 9.780đ | -70.220đ | -87,77% | 2,29 % | 2,29 % |
+| balanced | 12.802đ | -67.198đ | -84,00% | 0,958 % | 0,958 % |
 
 Đánh giá trúng giải theo từng kỳ thật; ngưỡng Bonferroni p < 0.00238 cho tối đa 21 so sánh trên các game được chọn. CI ghép cặp là xấp xỉ t 95% chưa hiệu chỉnh; khoảng của tỷ lệ nhóm dùng Hoeffding theo số kỳ. Dấu '-' là chưa đủ thông tin để ước lượng.
 
-Chưa phát hiện cách chọn tăng tỷ lệ trúng giải so với random ở ngưỡng đã hiệu chỉnh.
+Có chênh lệch tăng tỷ lệ trúng giải ở ngưỡng trên trong mẫu này; chưa chứng minh dự đoán tốt hơn hoặc có lợi nhuận ở kỳ mới.
 
 Các lần lặp chỉ giảm nhiễu mô phỏng, không làm tăng số kỳ độc lập. Chốt thuật toán, mục tiêu và mốc --from-draw trước khi thu thập dữ liệu mới; chọn lại mốc sau khi xem kết quả không tạo kiểm chứng ngoài mẫu.
 
