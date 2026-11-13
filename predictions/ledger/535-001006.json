@@ -1,0 +1,224 @@
+{
+  "SchemaVersion": 1,
+  "GameCode": "535",
+  "TargetDrawId": 1006,
+  "TargetDrawAt": "2026-11-13T21:00:00+07:00",
+  "GeneratedAt": "2026-11-13T07:21:59.7142034+00:00",
+  "LatestInputDrawId": 1005,
+  "LatestInputDrawAt": "2026-11-13T13:00:00+07:00",
+  "InputHash": "B6612D48A2A8B790308768C126D2071BA591A0280513A3AD9878A3A6C2498C07",
+  "InputDrawCount": 1005,
+  "Seed": 20261113,
+  "Configuration": "sets=2;cover=8;unique-v2",
+  "CodeVersion": "git:9cbda38b771fa8b4e8c1e12977a200eeb37dabc4;cli:38bd3728-4ca5-4b6d-98a7-d7854fcd6600;core:66048a0a-d6c1-44be-a506-75aad2bfcd9d",
+  "Tickets": [
+    {
+      "Strategy": "hot",
+      "Ticket": {
+        "Numbers": [
+          2,
+          10,
+          26,
+          27,
+          33
+        ],
+        "Special": 6
+      }
+    },
+    {
+      "Strategy": "hot",
+      "Ticket": {
+        "Numbers": [
+          1,
+          7,
+          8,
+          25,
+          27
+        ],
+        "Special": 6
+      }
+    },
+    {
+      "Strategy": "cold",
+      "Ticket": {
+        "Numbers": [
+          16,
+          26,
+          29,
+          30,
+          34
+        ],
+        "Special": 4
+      }
+    },
+    {
+      "Strategy": "cold",
+      "Ticket": {
+        "Numbers": [
+          16,
+          20,
+          29,
+          32,
+          34
+        ],
+        "Special": 9
+      }
+    },
+    {
+      "Strategy": "balanced",
+      "Ticket": {
+        "Numbers": [
+          11,
+          12,
+          16,
+          29,
+          30
+        ],
+        "Special": 6
+      }
+    },
+    {
+      "Strategy": "balanced",
+      "Ticket": {
+        "Numbers": [
+          1,
+          10,
+          14,
+          23,
+          34
+        ],
+        "Special": 8
+      }
+    },
+    {
+      "Strategy": "random",
+      "Ticket": {
+        "Numbers": [
+          1,
+          5,
+          13,
+          20,
+          23
+        ],
+        "Special": 4
+      }
+    },
+    {
+      "Strategy": "random",
+      "Ticket": {
+        "Numbers": [
+          2,
+          7,
+          10,
+          15,
+          23
+        ],
+        "Special": 2
+      }
+    },
+    {
+      "Strategy": "cover",
+      "Ticket": {
+        "Numbers": [
+          13,
+          18,
+          22,
+          27,
+          35
+        ],
+        "Special": 1
+      }
+    },
+    {
+      "Strategy": "cover",
+      "Ticket": {
+        "Numbers": [
+          8,
+          9,
+          15,
+          16,
+          23
+        ],
+        "Special": 6
+      }
+    },
+    {
+      "Strategy": "cover",
+      "Ticket": {
+        "Numbers": [
+          3,
+          7,
+          19,
+          20,
+          26
+        ],
+        "Special": 8
+      }
+    },
+    {
+      "Strategy": "cover",
+      "Ticket": {
+        "Numbers": [
+          4,
+          14,
+          17,
+          29,
+          32
+        ],
+        "Special": 2
+      }
+    },
+    {
+      "Strategy": "cover",
+      "Ticket": {
+        "Numbers": [
+          6,
+          12,
+          21,
+          28,
+          30
+        ],
+        "Special": 12
+      }
+    },
+    {
+      "Strategy": "cover",
+      "Ticket": {
+        "Numbers": [
+          1,
+          2,
+          5,
+          31,
+          33
+        ],
+        "Special": 10
+      }
+    },
+    {
+      "Strategy": "cover",
+      "Ticket": {
+        "Numbers": [
+          10,
+          11,
+          24,
+          25,
+          34
+        ],
+        "Special": 3
+      }
+    },
+    {
+      "Strategy": "cover",
+      "Ticket": {
+        "Numbers": [
+          4,
+          8,
+          10,
+          13,
+          21
+        ],
+        "Special": 11
+      }
+    }
+  ]
+}
